@@ -312,10 +312,19 @@
           <div class="footer__payment">
             <span class="visually-hidden">{{ 'sections.footer.payment' | t }}</span>
             <ul class="list list-payment" role="list">
+              {%- assign manual_types = section.settings.manual_payment_methods | split: ',' -%}
               {%- for type in shop.enabled_payment_types -%}
                 <li class="list-payment__item">
                   {{ type | payment_type_svg_tag: class: 'icon icon--full-color' }}
                 </li>
+              {%- endfor -%}
+              {%- for manual_type in manual_types -%}
+                {%- assign cleaned_type = manual_type | strip | downcase -%}
+                {%- if cleaned_type != blank -%}
+                  <li class="list-payment__item">
+                    {{ cleaned_type | payment_type_svg_tag: class: 'icon icon--full-color' }}
+                  </li>
+                {%- endif -%}
               {%- endfor -%}
             </ul>
           </div>
@@ -529,6 +538,13 @@
       "id": "payment_enable",
       "default": true,
       "label": "t:sections.footer.settings.payment_enable.label"
+    },
+    {
+      "type": "text",
+      "id": "manual_payment_methods",
+      "default": "visa,master,american_express,apple_pay,google_pay,paypal",
+      "label": "Manual payment icons",
+      "info": "Comma-separated list (e.g., visa, master, american_express, apple_pay, google_pay, paypal, klarna, bitcoin)"
     },
     {
       "type": "checkbox",
