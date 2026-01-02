@@ -8,6 +8,13 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+/* Ensure images never exceed their containers */
+img {
+  max-width: 100%;
+  height: auto;
 }
 
 .drop-hero {
@@ -16,6 +23,7 @@
   grid-template-columns: 1fr;
   gap: 2rem;
   padding: 2rem 0;
+  width: 100%;
 }
 
 @media screen and (min-width: 990px) {
@@ -84,17 +92,20 @@
 .drop-countdown {
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.5rem; /* Reduced gap for mobile */
   margin: 2rem 0;
-  padding: 2rem;
+  padding: 1.5rem; /* Reduced padding for mobile */
   background: var(--mysterious-glass-bg, rgba(255, 255, 255, 0.03));
   border: 1px solid var(--mysterious-glass-border, rgba(255, 255, 255, 0.08));
   border-radius: 16px;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 @media screen and (min-width: 750px) {
   .drop-countdown {
     gap: 2rem;
+    padding: 2rem;
   }
 }
 
