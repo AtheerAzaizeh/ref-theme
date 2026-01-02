@@ -1,0 +1,475 @@
+/**
+ * Mysterious Design Enhancement System
+ * Dark, moody, emotionally captivating design layer
+ */
+
+:root {
+  /* === Core Mystery Palette === */
+  --mysterious-bg-deep: #0a0a0f;
+  --mysterious-bg-dark: #0f0f18;
+  --mysterious-bg-surface: rgba(20, 20, 30, 0.85);
+  --mysterious-bg-elevated: rgba(30, 30, 45, 0.9);
+
+  /* === Glow & Accent Colors === */
+  --mysterious-glow-primary: #8b5cf6;
+  --mysterious-glow-secondary: #06ffa5;
+  --mysterious-glow-accent: #ff6b9d;
+  --mysterious-glow-gold: #fbbf24;
+
+  /* === Text Hierarchy === */
+  --mysterious-text-primary: rgba(255, 255, 255, 0.95);
+  --mysterious-text-secondary: rgba(255, 255, 255, 0.75);
+  --mysterious-text-muted: rgba(255, 255, 255, 0.5);
+
+  /* === Atmospheric Effects === */
+  --mysterious-shadow-glow: 0 0 40px rgba(139, 92, 246, 0.3);
+  --mysterious-shadow-deep: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+  --mysterious-glass-blur: 20px;
+  --mysterious-glass-bg: rgba(255, 255, 255, 0.03);
+  --mysterious-glass-border: rgba(255, 255, 255, 0.08);
+
+  /* === Animation Timings === */
+  --mysterious-ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+  --mysterious-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --mysterious-duration-fast: 200ms;
+  --mysterious-duration-normal: 400ms;
+  --mysterious-duration-slow: 800ms;
+  --mysterious-duration-dramatic: 1200ms;
+}
+
+/* === Dark Atmospheric Base === */
+.mysterious-atmosphere {
+  background: radial-gradient(
+      ellipse 80% 50% at 50% -20%,
+      rgba(139, 92, 246, 0.15) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse 60% 40% at 100% 100%,
+      rgba(6, 255, 165, 0.08) 0%,
+      transparent 40%
+    ),
+    linear-gradient(
+      180deg,
+      var(--mysterious-bg-deep) 0%,
+      var(--mysterious-bg-dark) 100%
+    );
+  min-height: 100vh;
+}
+
+/* === Glassmorphism Card === */
+.mysterious-glass {
+  background: var(--mysterious-glass-bg);
+  backdrop-filter: blur(var(--mysterious-glass-blur));
+  -webkit-backdrop-filter: blur(var(--mysterious-glass-blur));
+  border: 1px solid var(--mysterious-glass-border);
+  border-radius: 16px;
+  box-shadow: var(--mysterious-shadow-deep);
+}
+
+/* === Glow Button Effects === */
+.mysterious-button {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    var(--mysterious-glow-primary) 0%,
+    #6d28d9 100%
+  );
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  overflow: hidden;
+  transition: all var(--mysterious-duration-normal)
+    var(--mysterious-ease-reveal);
+}
+
+.mysterious-button::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(
+    135deg,
+    var(--mysterious-glow-primary),
+    var(--mysterious-glow-secondary)
+  );
+  border-radius: 10px;
+  z-index: -1;
+  opacity: 0;
+  filter: blur(15px);
+  transition: opacity var(--mysterious-duration-normal)
+    var(--mysterious-ease-reveal);
+}
+
+.mysterious-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--mysterious-shadow-glow);
+}
+
+.mysterious-button:hover::before {
+  opacity: 1;
+}
+
+/* === Reveal Animation Classes === */
+.mysterious-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity var(--mysterious-duration-slow)
+      var(--mysterious-ease-reveal),
+    transform var(--mysterious-duration-slow) var(--mysterious-ease-reveal);
+}
+
+.mysterious-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mysterious-reveal-up {
+  opacity: 0;
+  transform: translateY(50px) scale(0.98);
+  transition: opacity var(--mysterious-duration-dramatic)
+      var(--mysterious-ease-reveal),
+    transform var(--mysterious-duration-dramatic) var(--mysterious-ease-reveal);
+}
+
+.mysterious-reveal-up.revealed {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* === Staggered Animation Delays === */
+[data-mysterious-delay="1"] {
+  transition-delay: 100ms;
+}
+[data-mysterious-delay="2"] {
+  transition-delay: 200ms;
+}
+[data-mysterious-delay="3"] {
+  transition-delay: 300ms;
+}
+[data-mysterious-delay="4"] {
+  transition-delay: 400ms;
+}
+[data-mysterious-delay="5"] {
+  transition-delay: 500ms;
+}
+
+/* === Pulse Attention Effect === */
+@keyframes mysterious-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 15px rgba(139, 92, 246, 0);
+  }
+}
+
+.mysterious-pulse {
+  animation: mysterious-pulse 2s ease-in-out infinite;
+}
+
+/* === Ambient Glow Animation === */
+@keyframes mysterious-ambient-glow {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+.mysterious-ambient::before {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  background: radial-gradient(
+    circle at center,
+    var(--mysterious-glow-primary) 0%,
+    transparent 70%
+  );
+  animation: mysterious-ambient-glow 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* === Vignette Overlay === */
+.mysterious-vignette::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 40%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* === Text Glow Effects === */
+.mysterious-text-glow {
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.5),
+    0 0 40px rgba(139, 92, 246, 0.3), 0 0 80px rgba(139, 92, 246, 0.1);
+}
+
+.mysterious-heading {
+  color: var(--mysterious-text-primary);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.mysterious-subheading {
+  color: var(--mysterious-text-muted);
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-size: 0.75em;
+}
+
+/* === Exclusive Badge === */
+.mysterious-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  background: var(--mysterious-glass-bg);
+  border: 1px solid var(--mysterious-glow-gold);
+  border-radius: 100px;
+  color: var(--mysterious-glow-gold);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.mysterious-badge::before {
+  content: "★";
+  font-size: 0.6em;
+}
+
+/* === Input Field Glow === */
+.mysterious-input {
+  background: var(--mysterious-glass-bg);
+  border: 1px solid var(--mysterious-glass-border);
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  color: var(--mysterious-text-primary);
+  font-size: 1rem;
+  transition: all var(--mysterious-duration-normal)
+    var(--mysterious-ease-reveal);
+}
+
+.mysterious-input::placeholder {
+  color: var(--mysterious-text-muted);
+}
+
+.mysterious-input:focus {
+  outline: none;
+  border-color: var(--mysterious-glow-primary);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2),
+    0 0 30px rgba(139, 92, 246, 0.1);
+}
+
+/* === Spotlight Effect === */
+.mysterious-spotlight {
+  position: relative;
+  overflow: hidden;
+}
+
+.mysterious-spotlight::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    rgba(139, 92, 246, 0.1) 60deg,
+    transparent 120deg
+  );
+  animation: mysterious-spotlight-rotate 10s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes mysterious-spotlight-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* === Hover Lift Effect === */
+.mysterious-lift {
+  transition: transform var(--mysterious-duration-normal)
+    var(--mysterious-ease-bounce);
+}
+
+.mysterious-lift:hover {
+  transform: translateY(-8px);
+}
+
+/* === Image Reveal Mask === */
+.mysterious-image-reveal {
+  position: relative;
+  overflow: hidden;
+}
+
+.mysterious-image-reveal img {
+  transition: transform var(--mysterious-duration-slow)
+    var(--mysterious-ease-reveal);
+}
+
+.mysterious-image-reveal:hover img {
+  transform: scale(1.05);
+}
+
+/* === Particle Dust Effect (CSS Only) === */
+@keyframes mysterious-float-particle {
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(20px);
+    opacity: 0;
+  }
+}
+
+.mysterious-particles {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mysterious-particles::before,
+.mysterious-particles::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: mysterious-float-particle 15s linear infinite;
+}
+
+.mysterious-particles::before {
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.mysterious-particles::after {
+  left: 80%;
+  animation-delay: -7s;
+}
+
+/* === Cursor Glow Target === */
+.mysterious-cursor-glow {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(
+    circle,
+    rgba(139, 92, 246, 0.15) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.mysterious-cursor-glow.active {
+  opacity: 1;
+}
+
+/* === Section Divider === */
+.mysterious-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--mysterious-glass-border) 50%,
+    transparent 100%
+  );
+  margin: 4rem 0;
+}
+
+/* === Urgency Styling === */
+.mysterious-urgency {
+  color: var(--mysterious-glow-accent);
+  font-weight: 600;
+  animation: mysterious-urgency-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes mysterious-urgency-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* === Social Proof Counter === */
+.mysterious-social-proof {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--mysterious-text-muted);
+}
+
+.mysterious-social-proof-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--mysterious-glow-secondary);
+  border-radius: 50%;
+  animation: mysterious-pulse 2s ease-in-out infinite;
+}
+
+/* === Accessibility: Respect Reduced Motion === */
+@media (prefers-reduced-motion: reduce) {
+  .mysterious-reveal,
+  .mysterious-reveal-up,
+  .mysterious-pulse,
+  .mysterious-ambient::before,
+  .mysterious-spotlight::before,
+  .mysterious-particles::before,
+  .mysterious-particles::after {
+    animation: none;
+    transition: none;
+  }
+
+  .mysterious-button:hover {
+    transform: none;
+  }
+
+  .mysterious-lift:hover {
+    transform: none;
+  }
+}

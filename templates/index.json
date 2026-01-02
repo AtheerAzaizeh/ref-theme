@@ -1,0 +1,63 @@
+/*
+ * ------------------------------------------------------------
+ * Single Drop Product Store - Homepage
+ * Focused on one exclusive product drop
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "drop-hero": {
+      "type": "main-drop",
+      "settings": {
+        "show_countdown": true,
+        "show_stock_level": true,
+        "initial_stock": 100,
+        "limit_per_customer": 2,
+        "show_notify_form": true,
+        "show_exclusive_badge": true,
+        "exclusive_badge_text": "Exclusive Drop",
+        "show_trust_badges": true,
+        "color_scheme": "scheme-1",
+        "padding_top": 80,
+        "padding_bottom": 80
+      }
+    },
+    "newsletter": {
+      "type": "newsletter",
+      "blocks": {
+        "heading": {
+          "type": "heading",
+          "settings": {
+            "heading": "Join the Drop List",
+            "heading_size": "h1"
+          }
+        },
+        "paragraph": {
+          "type": "paragraph",
+          "settings": {
+            "text": "<p>Be the first to know about exclusive drops, limited editions, and members-only access.<\/p>"
+          }
+        },
+        "email_form": {
+          "type": "email_form",
+          "settings": {}
+        }
+      },
+      "block_order": [
+        "heading",
+        "paragraph",
+        "email_form"
+      ],
+      "settings": {
+        "color_scheme": "scheme-2",
+        "full_width": true,
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    }
+  },
+  "order": [
+    "drop-hero",
+    "newsletter"
+  ]
+}

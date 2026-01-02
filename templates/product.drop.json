@@ -1,0 +1,23 @@
+{
+  "sections": {
+    "main-drop": {
+      "type": "main-drop",
+      "settings": {
+        "show_countdown": true,
+        "show_stock_level": true,
+        "initial_stock": 100,
+        "limit_per_customer": 2,
+        "show_notify_form": true,
+        "show_exclusive_badge": true,
+        "exclusive_badge_text": "Limited Edition",
+        "show_trust_badges": true,
+        "color_scheme": "scheme-1",
+        "padding_top": 60,
+        "padding_bottom": 60
+      }
+    }
+  },
+  "order": [
+    "main-drop"
+  ]
+}

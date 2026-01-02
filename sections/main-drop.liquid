@@ -1,0 +1,487 @@
+{{ 'drop-styles.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'drop-countdown.js' | asset_url }}" defer></script>
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+{%- liquid
+  assign product = section.settings.product
+  assign now = 'now' | date: '%s' | plus: 0
+  assign start_timestamp = section.settings.drop_start_date | date: '%s' | plus: 0
+  assign end_timestamp = section.settings.drop_end_date | date: '%s' | plus: 0
+
+  if start_timestamp > 0 and now < start_timestamp
+    assign drop_status = 'upcoming'
+  elsif end_timestamp > 0 and now > end_timestamp
+    assign drop_status = 'ended'
+  else
+    assign drop_status = 'live'
+  endif
+
+  assign countdown_target = section.settings.drop_start_date
+  if drop_status == 'live'
+    assign countdown_target = section.settings.drop_end_date
+  endif
+-%}
+
+<drop-status
+  class="drop-section color-{{ section.settings.color_scheme }} gradient section-{{ section.id }}-padding"
+  data-start-date="{{ section.settings.drop_start_date | date: '%Y-%m-%dT%H:%M:%S' }}"
+  data-end-date="{{ section.settings.drop_end_date | date: '%Y-%m-%dT%H:%M:%S' }}"
+  data-status="{{ drop_status }}"
+>
+  <div class="page-width">
+    {%- if product != blank -%}
+      <div class="drop-hero">
+        {%- comment -%} Product Media {%- endcomment -%}
+        <div class="drop-media mysterious-spotlight mysterious-image-reveal">
+          {%- if section.settings.show_exclusive_badge -%}
+            <span class="drop-media__badge">
+              {{- section.settings.exclusive_badge_text | default: 'Limited Edition' -}}
+            </span>
+          {%- endif -%}
+
+          {%- if product.featured_media -%}
+            {{
+              product.featured_media
+              | image_url: width: 1200
+              | image_tag:
+                loading: 'eager',
+                class: 'drop-media__image',
+                widths: '375, 550, 750, 1100, 1200',
+                sizes: '(min-width: 990px) 50vw, 100vw'
+            }}
+          {%- else -%}
+            {{ 'product-1' | placeholder_svg_tag: 'drop-media__image placeholder-svg' }}
+          {%- endif -%}
+        </div>
+
+        {%- comment -%} Product Info {%- endcomment -%}
+        <div class="drop-info">
+          {%- comment -%} Status Badge {%- endcomment -%}
+          <div class="drop-status drop-status--{{ drop_status }}">
+            <span class="drop-status__dot"></span>
+            <span class="drop-status__text">
+              {%- case drop_status -%}
+                {%- when 'upcoming' -%}
+                  Coming Soon
+                {%- when 'live' -%}
+                  Drop Live
+                {%- when 'ended' -%}
+                  Drop Ended
+              {%- endcase -%}
+            </span>
+          </div>
+
+          {%- comment -%} Title & Price {%- endcomment -%}
+          <div class="drop-info__header">
+            {%- if product.vendor != blank -%}
+              <span class="drop-info__subtitle">{{ product.vendor }}</span>
+            {%- endif -%}
+            <h1 class="drop-info__title mysterious-heading">{{ product.title | escape }}</h1>
+          </div>
+
+          <div class="drop-info__price">
+            <span class="drop-info__price-current">{{ product.price | money }}</span>
+            {%- if product.compare_at_price > product.price -%}
+              <span class="drop-info__price-compare">{{ product.compare_at_price | money }}</span>
+            {%- endif -%}
+          </div>
+
+          {%- comment -%} Countdown Timer {%- endcomment -%}
+          {%- if section.settings.show_countdown and countdown_target != blank -%}
+            <drop-countdown
+              class="drop-countdown"
+              data-start-date="{{ section.settings.drop_start_date | date: '%Y-%m-%dT%H:%M:%S' }}"
+              data-end-date="{{ section.settings.drop_end_date | date: '%Y-%m-%dT%H:%M:%S' }}"
+            >
+              <div class="drop-countdown__unit">
+                <span class="drop-countdown__value" data-countdown-days>00</span>
+                <span class="drop-countdown__label">Days</span>
+              </div>
+              <span class="drop-countdown__separator">:</span>
+              <div class="drop-countdown__unit">
+                <span class="drop-countdown__value" data-countdown-hours>00</span>
+                <span class="drop-countdown__label">Hours</span>
+              </div>
+              <span class="drop-countdown__separator">:</span>
+              <div class="drop-countdown__unit">
+                <span class="drop-countdown__value" data-countdown-minutes>00</span>
+                <span class="drop-countdown__label">Mins</span>
+              </div>
+              <span class="drop-countdown__separator">:</span>
+              <div class="drop-countdown__unit">
+                <span class="drop-countdown__value" data-countdown-seconds>00</span>
+                <span class="drop-countdown__label">Secs</span>
+              </div>
+            </drop-countdown>
+          {%- endif -%}
+
+          {%- comment -%} Stock Urgency {%- endcomment -%}
+          {%- if section.settings.show_stock_level and drop_status == 'live' -%}
+            {%- assign total_inventory = 0 -%}
+            {%- for variant in product.variants -%}
+              {%- if variant.inventory_quantity > 0 -%}
+                {%- assign total_inventory = total_inventory | plus: variant.inventory_quantity -%}
+              {%- endif -%}
+            {%- endfor -%}
+            {%- assign stock_percentage = total_inventory
+              | times: 100
+              | divided_by: section.settings.initial_stock
+              | at_most: 100
+            -%}
+
+            <div class="drop-stock">
+              <div class="drop-stock__header">
+                <span class="drop-stock__label">Limited Stock</span>
+                <span class="drop-stock__count">{{ total_inventory }} remaining</span>
+              </div>
+              <div class="drop-stock__bar">
+                <div class="drop-stock__fill" style="width: {{ stock_percentage }}%"></div>
+              </div>
+            </div>
+          {%- endif -%}
+
+          {%- comment -%} Variant Picker {%- endcomment -%}
+          {%- unless product.has_only_default_variant -%}
+            {%- for option in product.options_with_values -%}
+              <div class="drop-variants">
+                <span class="drop-variants__label">{{ option.name }}</span>
+                <div class="drop-variants__options">
+                  {%- for value in option.values -%}
+                    {%- assign option_index = 'option' | append: option.position -%}
+                    {%- assign is_selected = false -%}
+                    {%- if product.selected_or_first_available_variant[option_index] == value -%}
+                      {%- assign is_selected = true -%}
+                    {%- endif -%}
+                    <button
+                      type="button"
+                      class="drop-variant-option{% if is_selected %} drop-variant-option--selected{% endif %}"
+                      data-option-position="{{ option.position }}"
+                      data-option-value="{{ value | escape }}"
+                    >
+                      {{ value }}
+                    </button>
+                  {%- endfor -%}
+                </div>
+              </div>
+            {%- endfor -%}
+          {%- endunless -%}
+
+          {%- comment -%} Limit Per Customer {%- endcomment -%}
+          {%- if section.settings.limit_per_customer > 0 -%}
+            <div class="drop-limit">
+              <svg class="drop-limit__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>Limit {{ section.settings.limit_per_customer }} per customer</span>
+            </div>
+          {%- endif -%}
+
+          {%- comment -%} Add to Cart / Buy Now / Notify Me {%- endcomment -%}
+          {%- if drop_status == 'live' -%}
+            <div class="drop-buttons">
+              {%- comment -%} Add to Cart Button {%- endcomment -%}
+              {%- if section.settings.add_to_cart_link != blank -%}
+                <a href="{{ section.settings.add_to_cart_link }}" class="drop-add-button drop-add-button--secondary">
+                  {{ section.settings.add_to_cart_label | default: 'Add to Cart' }}
+                </a>
+              {%- else -%}
+                <form action="{{ routes.cart_add_url }}" method="post" id="drop-add-form" class="drop-form">
+                  <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                  <input type="hidden" name="quantity" value="1">
+                  <button
+                    type="submit"
+                    name="add"
+                    class="drop-add-button drop-add-button--secondary"
+                    {% unless product.available %}
+                      disabled
+                    {% endunless %}
+                  >
+                    {%- if product.available -%}
+                      {{ section.settings.add_to_cart_label | default: 'Add to Cart' }}
+                    {%- else -%}
+                      Sold Out
+                    {%- endif -%}
+                  </button>
+                </form>
+              {%- endif -%}
+
+              {%- comment -%} Buy Now Button {%- endcomment -%}
+              {%- if section.settings.buy_now_link != blank -%}
+                <a
+                  href="{{ section.settings.buy_now_link }}"
+                  class="drop-add-button drop-add-button--primary mysterious-pulse"
+                >
+                  {{ section.settings.buy_now_label | default: 'Buy Now' }}
+                </a>
+              {%- else -%}
+                <form action="{{ routes.cart_add_url }}" method="post" id="drop-buy-form" class="drop-form">
+                  <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                  <input type="hidden" name="quantity" value="1">
+                  <input type="hidden" name="return_to" value="/checkout">
+                  <button
+                    type="submit"
+                    name="add"
+                    class="drop-add-button drop-add-button--primary mysterious-pulse"
+                    {% unless product.available %}
+                      disabled
+                    {% endunless %}
+                  >
+                    {%- if product.available -%}
+                      {{ section.settings.buy_now_label | default: 'Buy Now' }}
+                    {%- else -%}
+                      Sold Out
+                    {%- endif -%}
+                  </button>
+                </form>
+              {%- endif -%}
+            </div>
+          {%- else -%}
+            <button type="button" class="drop-add-button drop-add-button--disabled" disabled>
+              {%- if drop_status == 'upcoming' -%}
+                Coming Soon
+              {%- else -%}
+                Drop Ended
+              {%- endif -%}
+            </button>
+          {%- endif -%}
+
+          {%- comment -%} Notify Me Form {%- endcomment -%}
+          {%- if section.settings.show_notify_form and drop_status != 'live' -%}
+            <drop-notify class="drop-notify">
+              <h3 class="drop-notify__title">Get Notified</h3>
+              <p class="drop-notify__text">
+                {%- if drop_status == 'upcoming' -%}
+                  Be the first to know when this drop goes live.
+                {%- else -%}
+                  Sign up to be notified for the next drop.
+                {%- endif -%}
+              </p>
+              <form class="drop-notify__form">
+                <input
+                  type="email"
+                  class="drop-notify__input"
+                  placeholder="Enter your email"
+                  required
+                >
+                <button type="submit" class="drop-notify__submit">Notify Me</button>
+              </form>
+              <div class="drop-notify__success" style="display: none;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 11-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <span>You're on the list!</span>
+              </div>
+            </drop-notify>
+          {%- endif -%}
+
+          {%- comment -%} Description {%- endcomment -%}
+          {%- if product.description != blank -%}
+            <div class="drop-info__description rte">
+              {{ product.description }}
+            </div>
+          {%- endif -%}
+
+          {%- comment -%} Trust Badges {%- endcomment -%}
+          {%- if section.settings.show_trust_badges -%}
+            <div class="drop-trust">
+              <div class="drop-trust__item">
+                <svg class="drop-trust__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0110 0v4"></path>
+                </svg>
+                <span class="drop-trust__label">Secure Checkout</span>
+              </div>
+              <div class="drop-trust__item">
+                <svg class="drop-trust__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14"></path>
+                  <path d="M12 5l7 7-7 7"></path>
+                </svg>
+                <span class="drop-trust__label">Fast Shipping</span>
+              </div>
+              <div class="drop-trust__item">
+                <svg class="drop-trust__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="17 1 21 5 17 9"></polyline>
+                  <path d="M3 11V9a4 4 0 014-4h14"></path>
+                  <polyline points="7 23 3 19 7 15"></polyline>
+                  <path d="M21 13v2a4 4 0 01-4 4H3"></path>
+                </svg>
+                <span class="drop-trust__label">Easy Returns</span>
+              </div>
+              <div class="drop-trust__item">
+                <svg class="drop-trust__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  <path d="M9 12l2 2 4-4"></path>
+                </svg>
+                <span class="drop-trust__label">Authentic</span>
+              </div>
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+    {%- else -%}
+      {%- comment -%} No product selected {%- endcomment -%}
+      <div class="drop-hero">
+        <div class="drop-media">
+          {{ 'product-1' | placeholder_svg_tag: 'drop-media__image placeholder-svg' }}
+        </div>
+        <div class="drop-info">
+          <div class="drop-status drop-status--upcoming">
+            <span class="drop-status__dot"></span>
+            <span class="drop-status__text">Coming Soon</span>
+          </div>
+          <h1 class="drop-info__title">Select a product</h1>
+          <p class="drop-info__description">Choose a product in the theme editor to display your drop.</p>
+        </div>
+      </div>
+    {%- endif -%}
+  </div>
+</drop-status>
+
+{% schema %}
+{
+  "name": "Drop Product",
+  "tag": "section",
+  "class": "section section-drop",
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product"
+    },
+    {
+      "type": "header",
+      "content": "Drop Schedule"
+    },
+    {
+      "type": "text",
+      "id": "drop_start_date",
+      "label": "Drop Start Date",
+      "info": "Format: YYYY-MM-DD HH:MM (e.g., 2026-01-15 10:00)"
+    },
+    {
+      "type": "text",
+      "id": "drop_end_date",
+      "label": "Drop End Date",
+      "info": "Format: YYYY-MM-DD HH:MM (leave blank for no end)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_countdown",
+      "label": "Show countdown timer",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Stock & Limits"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_stock_level",
+      "label": "Show stock urgency bar",
+      "default": true
+    },
+    {
+      "type": "number",
+      "id": "initial_stock",
+      "label": "Initial stock quantity",
+      "default": 100,
+      "info": "Used to calculate stock percentage"
+    },
+    {
+      "type": "number",
+      "id": "limit_per_customer",
+      "label": "Limit per customer",
+      "default": 2,
+      "info": "Set to 0 for no limit"
+    },
+    {
+      "type": "header",
+      "content": "Notifications"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_notify_form",
+      "label": "Show notify me form",
+      "default": true,
+      "info": "Shown when drop is upcoming or ended"
+    },
+    {
+      "type": "header",
+      "content": "Badges"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_exclusive_badge",
+      "label": "Show exclusive badge",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "exclusive_badge_text",
+      "label": "Badge text",
+      "default": "Limited Edition"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_trust_badges",
+      "label": "Show trust badges",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 60
+    }
+  ],
+  "presets": [
+    {
+      "name": "Drop Product"
+    }
+  ]
+}
+{% endschema %}

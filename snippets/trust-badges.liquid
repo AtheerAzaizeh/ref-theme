@@ -1,0 +1,127 @@
+{%- comment -%}
+  Trust Badges Snippet
+  Displays trust and guarantee indicators
+{%- endcomment -%}
+
+<div class="trust-badges {{ class }}">
+  {%- if show_secure -%}
+    <div class="trust-badge">
+      <svg
+        class="trust-badge__icon"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0110 0v4"></path>
+      </svg>
+      <span class="trust-badge__text">Secure Checkout</span>
+    </div>
+  {%- endif -%}
+
+  {%- if show_shipping -%}
+    <div class="trust-badge">
+      <svg
+        class="trust-badge__icon"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <rect x="1" y="3" width="15" height="13" rx="2"></rect>
+        <circle cx="6" cy="19" r="2"></circle>
+        <circle cx="17" cy="19" r="2"></circle>
+        <path d="M16 3h3l3 5v8h-6"></path>
+      </svg>
+      <span class="trust-badge__text">{{ shipping_text | default: 'Free Shipping' }}</span>
+    </div>
+  {%- endif -%}
+
+  {%- if show_returns -%}
+    <div class="trust-badge">
+      <svg
+        class="trust-badge__icon"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <polyline points="17 1 21 5 17 9"></polyline>
+        <path d="M3 11V9a4 4 0 014-4h14"></path>
+        <polyline points="7 23 3 19 7 15"></polyline>
+        <path d="M21 13v2a4 4 0 01-4 4H3"></path>
+      </svg>
+      <span class="trust-badge__text">{{ returns_text | default: 'Easy Returns' }}</span>
+    </div>
+  {%- endif -%}
+
+  {%- if show_authentic -%}
+    <div class="trust-badge">
+      <svg
+        class="trust-badge__icon"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        <path d="M9 12l2 2 4-4"></path>
+      </svg>
+      <span class="trust-badge__text">100% Authentic</span>
+    </div>
+  {%- endif -%}
+
+  {%- if show_support -%}
+    <div class="trust-badge">
+      <svg
+        class="trust-badge__icon"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"></path>
+      </svg>
+      <span class="trust-badge__text">24/7 Support</span>
+    </div>
+  {%- endif -%}
+</div>
+
+<style>
+  .trust-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    padding: 1.5rem;
+    border-top: 1px solid rgba(var(--color-foreground), 0.1);
+    margin-top: 1.5rem;
+  }
+
+  .trust-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(var(--color-foreground), 0.7);
+  }
+
+  .trust-badge__icon {
+    opacity: 0.8;
+  }
+
+  .trust-badge__text {
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+</style>
