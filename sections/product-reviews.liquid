@@ -1,0 +1,745 @@
+{%- liquid
+  assign current_product = product
+  assign is_verified_buyer = false
+
+  if customer
+    for order in customer.orders
+      for line_item in order.line_items
+        if line_item.product_id == current_product.id
+          assign is_verified_buyer = true
+          break
+        endif
+      endfor
+      if is_verified_buyer
+        break
+      endif
+    endfor
+  endif
+
+  assign total_reviews = section.blocks.size | default: 0
+  assign avg_rating = 0
+  if total_reviews > 0
+    assign sum = 0
+    for block in section.blocks
+      assign sum = sum | plus: block.settings.rating
+    endfor
+    assign avg_rating = sum | times: 1.0 | divided_by: total_reviews | round: 1
+  endif
+-%}
+
+<style>
+  .drop-reviews {
+    --review-bg: var(--mysterious-bg-deep, #0a0a0a);
+    --review-border: var(--mysterious-glass-border, rgba(255, 255, 255, 0.1));
+    --review-accent: var(--mysterious-glow-primary, #8b5cf6);
+    --review-text: var(--mysterious-text-primary, #fff);
+    --review-text-muted: var(--mysterious-text-muted, #999);
+
+    background: var(--review-bg);
+    color: var(--review-text);
+    padding: 80px 0;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .drop-reviews__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .drop-reviews__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 50px;
+    border-bottom: 1px solid var(--review-border);
+    padding-bottom: 30px;
+  }
+
+  .drop-reviews__title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.03em;
+  }
+
+  /* Ratings Summary */
+  .drop-reviews__summary {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 40px;
+    margin-bottom: 60px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 40px;
+    border-radius: 12px;
+    border: 1px solid var(--review-border);
+  }
+
+  .drop-reviews__avg {
+    text-align: center;
+  }
+
+  .drop-reviews__score {
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--review-accent);
+    line-height: 1;
+    display: block;
+  }
+
+  .drop-reviews__stars {
+    color: #ffd700;
+    margin: 10px 0;
+    font-size: 1.2rem;
+  }
+
+  .drop-reviews__count {
+    font-size: 0.9rem;
+    color: var(--review-text-muted);
+  }
+
+  .drop-reviews__bars {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .drop-reviews__bar-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 0.85rem;
+  }
+
+  .drop-reviews__bar-label {
+    width: 50px;
+  }
+  .drop-reviews__bar-bg {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .drop-reviews__bar-fill {
+    height: 100%;
+    background: var(--review-accent);
+    box-shadow: 0 0 10px var(--review-accent);
+  }
+
+  /* Review Items */
+  .drop-reviews__list {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .review-item {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--review-border);
+    transition: transform 0.3s ease;
+  }
+
+  .review-item:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .review-item__header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+
+  .review-item__user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .review-item__badge {
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--review-accent);
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 20px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+  }
+
+  .review-item__date {
+    font-size: 0.85rem;
+    color: var(--review-text-muted);
+  }
+
+  .review-item__content {
+    line-height: 1.6;
+    font-size: 1.05rem;
+  }
+
+  /* Form */
+  .drop-reviews__form-trigger {
+    margin-top: 40px;
+    text-align: center;
+  }
+
+  .drop-reviews__btn {
+    padding: 15px 35px;
+    background: var(--review-accent);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.3s ease;
+  }
+
+  .drop-reviews__btn:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  }
+
+  .drop-reviews__locked {
+    text-align: center;
+    padding: 40px;
+    background: rgba(139, 92, 246, 0.05);
+    border: 1px dashed var(--review-accent);
+    border-radius: 8px;
+    margin-top: 40px;
+  }
+
+  /* Filters */
+  .drop-reviews__filter-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .drop-reviews__select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--review-border);
+    color: var(--review-text);
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    min-width: 150px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+
+  .drop-reviews__select:focus {
+    border-color: var(--review-accent);
+  }
+
+  @media (max-width: 768px) {
+    .drop-reviews__summary {
+      grid-template-columns: 1fr;
+    }
+    .drop-reviews__filter-group {
+      flex-direction: column;
+      width: 100%;
+    }
+    .drop-reviews__select {
+      width: 100%;
+    }
+  }
+
+  /* Modal Styles */
+  .review-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .review-modal__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+  }
+
+  .review-modal__content {
+    position: relative;
+    background: #111;
+    width: 100%;
+    max-width: 600px;
+    padding: 50px;
+    border: 1px solid var(--review-border);
+    border-radius: 16px;
+    z-index: 1001;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
+  }
+
+  .review-modal__close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: var(--review-text-muted);
+    font-size: 2rem;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .review-modal__close:hover {
+    color: var(--review-accent);
+  }
+
+  .review-modal__title {
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 0 0 10px 0;
+  }
+
+  .review-modal__subtitle {
+    color: var(--review-accent);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 30px;
+  }
+
+  /* Form Elements */
+  .review-form__group {
+    margin-bottom: 25px;
+  }
+
+  .review-form__label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .review-form__stars {
+    font-size: 1.8rem;
+    color: var(--review-text-muted);
+    cursor: pointer;
+    display: flex;
+    gap: 8px;
+  }
+
+  .review-form__stars span {
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+
+  .review-form__stars span.active {
+    color: #ffd700;
+  }
+
+  .review-form__stars span:hover {
+    transform: scale(1.2);
+  }
+
+  .review-form__input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--review-border);
+    color: var(--review-text);
+    padding: 15px;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+
+  .review-form__input:focus {
+    border-color: var(--review-accent);
+  }
+
+  .review-form__upload {
+    position: relative;
+    height: 80px;
+    border: 1px dashed var(--review-border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .review-form__file {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .review-form__upload-placeholder {
+    color: var(--review-text-muted);
+    font-size: 0.9rem;
+  }
+
+  .review-modal__success {
+    text-align: center;
+  }
+
+  .review-modal__icon {
+    width: 80px;
+    height: 80px;
+    background: var(--review-accent);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin: 0 auto 20px;
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+  }
+</style>
+
+<section class="drop-reviews" id="Reviews-{{ section.id }}">
+  <div class="drop-reviews__container">
+    <div class="drop-reviews__header">
+      <h2 class="drop-reviews__title">Community Reviews</h2>
+      <div class="drop-reviews__controls">
+        <div class="drop-reviews__filter-group">
+          <select id="ReviewFilter-{{ section.id }}" class="drop-reviews__select">
+            <option value="all">Rating: All</option>
+            <option value="5">5 Start</option>
+            <option value="4">4 Star</option>
+            <option value="3">3 Star</option>
+            <option value="2">2 Star</option>
+            <option value="1">1 Star</option>
+          </select>
+          <select id="ReviewSort-{{ section.id }}" class="drop-reviews__select">
+            <option value="newest">Sort: Newest</option>
+            <option value="oldest">Sort: Oldest</option>
+          </select>
+        </div>
+        <span class="drop-reviews__count">{{ total_reviews }} total reviews</span>
+      </div>
+    </div>
+
+    {%- if total_reviews > 0 -%}
+      <div class="drop-reviews__summary">
+        <div class="drop-reviews__avg">
+          <span class="drop-reviews__score">{{ avg_rating }}</span>
+          <div class="drop-reviews__stars">
+            {%- for i in (1..5) -%}
+              {%- if i <= avg_rating -%}★{%- else -%}☆{%- endif -%}
+            {%- endfor -%}
+          </div>
+          <span class="drop-reviews__count">Out of 5 stars</span>
+        </div>
+
+        <div class="drop-reviews__bars">
+          {%- for i in (1..5) reversed -%}
+            {%- liquid
+              assign count_for_star = 0
+              for block in section.blocks
+                if block.settings.rating == i
+                  assign count_for_star = count_for_star | plus: 1
+                endif
+              endfor
+              assign pct = count_for_star | times: 100 | divided_by: total_reviews
+            -%}
+            <div class="drop-reviews__bar-item">
+              <span class="drop-reviews__bar-label">{{ i }} Star</span>
+              <div class="drop-reviews__bar-bg">
+                <div class="drop-reviews__bar-fill" style="width: {{ pct }}%"></div>
+              </div>
+              <span>{{ count_for_star }}</span>
+            </div>
+          {%- endfor -%}
+        </div>
+      </div>
+
+      <div class="drop-reviews__list" id="ReviewList-{{ section.id }}">
+        {%- for block in section.blocks -%}
+          <div
+            class="review-item"
+            data-rating="{{ block.settings.rating }}"
+            data-date="{{ block.settings.date | date: '%s' | default: forloop.index }}"
+            {{ block.shopify_attributes }}
+          >
+            <div class="review-item__header">
+              <div class="review-item__user">
+                <strong>{{ block.settings.author | default: 'Anonymous' }}</strong>
+                {%- if block.settings.verified -%}
+                  <span class="review-item__badge">Verified Buyer</span>
+                {%- endif -%}
+              </div>
+              <span class="review-item__date">{{ block.settings.date }}</span>
+            </div>
+            <div class="drop-reviews__stars" style="margin: 0 0 15px 0; font-size: 0.9rem;">
+              {%- for i in (1..5) -%}
+                {%- if i <= block.settings.rating -%}★{%- else -%}☆{%- endif -%}
+              {%- endfor -%}
+            </div>
+            <div class="review-item__content">
+              {{ block.settings.content }}
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- else -%}
+      <div style="text-align: center; padding: 40px; color: var(--review-text-muted);">
+        No reviews yet. Be the first to share your experience.
+      </div>
+    {%- endif -%}
+
+    {%- if is_verified_buyer -%}
+      <div class="drop-reviews__form-trigger">
+        <button class="drop-reviews__btn" id="WriteReviewBtn-{{ section.id }}">Share Your Experience</button>
+      </div>
+
+      <!-- Review Submission Modal -->
+      <div class="review-modal" id="ReviewModal-{{ section.id }}" style="display: none;">
+        <div class="review-modal__content">
+          <button class="review-modal__close" id="CloseReviewModal-{{ section.id }}">&times;</button>
+          <h3 class="review-modal__title">Submit Your Review</h3>
+          <p class="review-modal__subtitle">Verified Purchase: {{ current_product.title }}</p>
+
+          <form class="review-form" id="ReviewForm-{{ section.id }}">
+            <div class="review-form__group">
+              <label class="review-form__label">Overall Rating</label>
+              <div class="review-form__stars" id="StarSelector-{{ section.id }}">
+                <span data-value="1">☆</span><span data-value="2">☆</span><span data-value="3">☆</span
+                ><span data-value="4">☆</span><span data-value="5">☆</span>
+              </div>
+              <input type="hidden" name="rating" id="RatingInput-{{ section.id }}" value="5">
+            </div>
+
+            <div class="review-form__group">
+              <label class="review-form__label" for="ReviewText-{{ section.id }}">Your Experience</label>
+              <textarea
+                id="ReviewText-{{ section.id }}"
+                class="review-form__input"
+                rows="5"
+                placeholder="What did you think of the fit, quality, and drop experience?"
+                required
+              ></textarea>
+            </div>
+
+            <div class="review-form__group">
+              <label class="review-form__label">Upload Photos/Videos (Optional)</label>
+              <div class="review-form__upload">
+                <input
+                  type="file"
+                  id="ReviewMedia-{{ section.id }}"
+                  class="review-form__file"
+                  accept="image/*,video/*"
+                  multiple
+                >
+                <div class="review-form__upload-placeholder">
+                  <span>+ Add Media</span>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="drop-reviews__btn" style="width: 100%;">Submit Review</button>
+          </form>
+
+          <div class="review-modal__success" id="ReviewSuccess-{{ section.id }}" style="display: none;">
+            <div class="review-modal__icon">✓</div>
+            <h4>Thank you!</h4>
+            <p>Your review has been submitted for moderation. It will appear on the site soon.</p>
+            <button class="drop-reviews__btn" onclick="location.reload()">Back to Product</button>
+          </div>
+        </div>
+        <div class="review-modal__overlay"></div>
+      </div>
+    {%- else -%}
+      <div class="drop-reviews__locked">
+        <p style="margin: 0;">Only customers who have purchased this item can leave a review.</p>
+        {%- unless customer -%}
+          <p style="font-size: 0.85rem; margin-top: 10px;">
+            <a href="{{ routes.account_login_url }}" style="color: var(--review-accent);">Log in</a> to check your
+            eligibility.
+          </p>
+        {%- endunless -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+<script>
+  (function () {
+    const section = document.getElementById('Reviews-{{ section.id }}');
+    if (!section) return;
+
+    const filterSelect = document.getElementById('ReviewFilter-{{ section.id }}');
+    const sortSelect = document.getElementById('ReviewSort-{{ section.id }}');
+    const list = document.getElementById('ReviewList-{{ section.id }}');
+    if (!list) return;
+
+    const reviews = Array.from(list.children);
+
+    function update() {
+      const rating = filterSelect.value;
+      const sort = sortSelect.value;
+
+      let items = [...reviews];
+      if (rating !== 'all') {
+        items = items.filter((i) => i.dataset.rating == rating);
+      }
+
+      items.sort((a, b) => {
+        const dateA = parseInt(a.dataset.date);
+        const dateB = parseInt(b.dataset.date);
+        if (sort === 'newest') return dateB - dateA;
+        return dateA - dateB;
+      });
+
+      list.innerHTML = '';
+      if (items.length === 0) {
+        list.innerHTML =
+          '<div style="text-align: center; padding: 40px; color: var(--review-text-muted);">No reviews match your filter.</div>';
+      } else {
+        items.forEach((i) => list.appendChild(i));
+      }
+    }
+
+    if (filterSelect) filterSelect.addEventListener('change', update);
+    if (sortSelect) sortSelect.addEventListener('change', update);
+
+    // Modal Logic
+    const modal = document.getElementById('ReviewModal-{{ section.id }}');
+    const openBtn = document.getElementById('WriteReviewBtn-{{ section.id }}');
+    const closeBtn = document.getElementById('CloseReviewModal-{{ section.id }}');
+    const overlay = section.querySelector('.review-modal__overlay');
+
+    if (openBtn && modal) {
+      openBtn.addEventListener('click', () => {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      });
+    }
+
+    const closeModal = () => {
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    };
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (overlay) overlay.addEventListener('click', closeModal);
+
+    // Star Selection
+    const starContainer = document.getElementById('StarSelector-{{ section.id }}');
+    const ratingInput = document.getElementById('RatingInput-{{ section.id }}');
+    if (starContainer && ratingInput) {
+      const stars = starContainer.querySelectorAll('span');
+      stars.forEach((star, index) => {
+        star.addEventListener('mouseover', () => {
+          stars.forEach((s, i) => (s.textContent = i <= index ? '★' : '☆'));
+        });
+        star.addEventListener('click', () => {
+          ratingInput.value = star.dataset.value;
+          stars.forEach((s, i) => {
+            s.classList.toggle('active', i < star.dataset.value);
+            s.textContent = i < star.dataset.value ? '★' : '☆';
+          });
+        });
+      });
+      starContainer.addEventListener('mouseleave', () => {
+        const val = ratingInput.value;
+        stars.forEach((s, i) => {
+          s.classList.toggle('active', i < val);
+          s.textContent = i < val ? '★' : '☆';
+        });
+      });
+      // Set initial
+      const initialVal = ratingInput.value;
+      stars.forEach((s, i) => {
+        s.classList.toggle('active', i < initialVal);
+        s.textContent = i < initialVal ? '★' : '☆';
+      });
+    }
+
+    // Form Submission Simulation
+    const form = document.getElementById('ReviewForm-{{ section.id }}');
+    const success = document.getElementById('ReviewSuccess-{{ section.id }}');
+    if (form && success) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        form.style.display = 'none';
+        success.style.display = 'block';
+        // In a real app, you would fetch() to a backend here
+      });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Verified Reviews",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        {
+          "type": "text",
+          "id": "author",
+          "label": "Author",
+          "default": "Verified User"
+        },
+        {
+          "type": "range",
+          "id": "rating",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "label": "Rating",
+          "default": 5
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Review Content",
+          "default": "<p>Absolutely amazing quality. The drop was exclusive and the fit is perfect.</p>"
+        },
+        {
+          "type": "text",
+          "id": "date",
+          "label": "Date",
+          "default": "Jan 2026"
+        },
+        {
+          "type": "checkbox",
+          "id": "verified",
+          "label": "Verified Buyer",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Verified Product Reviews",
+      "blocks": [
+        { "type": "review" },
+        {
+          "type": "review",
+          "settings": {
+            "rating": 4,
+            "content": "<p>Great piece, shipping was fast. A bit tight on the shoulders but looks 10/10.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
