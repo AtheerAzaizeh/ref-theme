@@ -1,0 +1,129 @@
+{{ 'section-header-minimal.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .minimal-header {
+    padding: {{ section.settings.padding_top | times: 0.5 | round: 0 }}px 0 {{ section.settings.padding_bottom | times: 0.5 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .minimal-header {
+      padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+<header class="minimal-header color-{{ section.settings.color_scheme }} gradient">
+  <div class="minimal-header__container page-width">
+    {%- comment -%} Logo {%- endcomment -%}
+    <div class="minimal-header__logo">
+      {%- if request.page_type == 'index' -%}
+        <h1 class="minimal-header__heading">
+      {%- endif -%}
+      <a href="{{ routes.root_url }}" class="minimal-header__logo-link">
+        {%- if section.settings.logo != blank -%}
+          <img
+            src="{{ section.settings.logo | image_url: width: 400 }}"
+            alt="{{ section.settings.logo.alt | default: shop.name | escape }}"
+            class="minimal-header__logo-image"
+            width="{{ section.settings.logo_width }}"
+            height="{{ section.settings.logo_width | divided_by: section.settings.logo.aspect_ratio | round }}"
+            loading="eager"
+          >
+        {%- elsif settings.logo != blank -%}
+          <img
+            src="{{ settings.logo | image_url: width: 400 }}"
+            alt="{{ settings.logo.alt | default: shop.name | escape }}"
+            class="minimal-header__logo-image"
+            width="{{ settings.logo_width }}"
+            height="{{ settings.logo_width | divided_by: settings.logo.aspect_ratio | round }}"
+            loading="eager"
+          >
+        {%- else -%}
+          <span class="minimal-header__shop-name">{{ shop.name }}</span>
+        {%- endif -%}
+      </a>
+      {%- if request.page_type == 'index' -%}
+        </h1>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Cart Icon {%- endcomment -%}
+    {%- if section.settings.show_cart -%}
+      <div class="minimal-header__icons">
+        <a href="{{ routes.cart_url }}" class="minimal-header__cart-link" aria-label="{{ 'sections.header.cart' | t }}">
+          <svg
+            class="minimal-header__cart-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <path d="M16 10a4 4 0 01-8 0"></path>
+          </svg>
+          {%- if cart != empty -%}
+            <span class="minimal-header__cart-count">{{ cart.item_count }}</span>
+          {%- endif -%}
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Minimal Header",
+  "class": "section-header",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logo image",
+      "info": "Upload your logo here, or use the global logo from Theme Settings"
+    },
+    {
+      "type": "range",
+      "id": "logo_width",
+      "min": 50,
+      "max": 300,
+      "step": 10,
+      "default": 120,
+      "unit": "px",
+      "label": "Logo width"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_cart",
+      "label": "Show cart icon",
+      "default": true
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding top",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "label": "Padding bottom",
+      "default": 20
+    }
+  ]
+}
+{% endschema %}

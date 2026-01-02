@@ -1,0 +1,137 @@
+/**
+ * Minimal Header Styles
+ * Clean, professional header for single-drop stores
+ */
+
+.minimal-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--mysterious-bg-deep, rgb(var(--color-background)));
+  border-bottom: 1px solid var(--mysterious-glass-border, rgba(255, 255, 255, 0.08));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.minimal-header__container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 60px;
+}
+
+/* === Logo === */
+.minimal-header__logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.minimal-header__heading {
+  margin: 0;
+  line-height: 1;
+}
+
+.minimal-header__logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--mysterious-text-primary, rgb(var(--color-foreground)));
+  transition: opacity 0.3s ease;
+}
+
+.minimal-header__logo-link:hover {
+  opacity: 0.8;
+}
+
+.minimal-header__logo-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.minimal-header__logo-link:hover .minimal-header__logo-image {
+  transform: scale(1.02);
+}
+
+.minimal-header__shop-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--mysterious-text-primary, rgb(var(--color-foreground)));
+}
+
+/* === Cart Icon === */
+.minimal-header__icons {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.minimal-header__cart-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: var(--mysterious-text-primary, rgb(var(--color-foreground)));
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+}
+
+.minimal-header__cart-link:hover {
+  background: var(--mysterious-glass-bg, rgba(255, 255, 255, 0.05));
+  color: var(--mysterious-glow-primary, #8b5cf6);
+}
+
+.minimal-header__cart-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.minimal-header__cart-count {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--mysterious-glow-primary, #8b5cf6);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* === Responsive === */
+@media screen and (max-width: 749px) {
+  .minimal-header__container {
+    padding: 0 1rem;
+    min-height: 50px;
+  }
+  
+  .minimal-header__logo-image {
+    max-height: 50px;
+    width: auto;
+  }
+  
+  .minimal-header__icons {
+    right: 1rem;
+  }
+}
+
+/* === Scroll State === */
+.minimal-header.scrolled {
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+}
