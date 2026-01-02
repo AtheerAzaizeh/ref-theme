@@ -1,0 +1,519 @@
+{%- liquid
+  assign section_id = section.id
+-%}
+
+<style>
+  .about-story-{{ section_id }} {
+    --story-bg: {{ section.settings.bg_color }};
+    --story-text: {{ section.settings.text_color }};
+    --story-accent: {{ section.settings.accent_color }};
+    background-color: var(--story-bg);
+    color: var(--story-text);
+    overflow: hidden;
+    position: relative;
+    font-family: 'Inter', sans-serif;
+  }
+
+  /* Cinematic Grain Overlay */
+  .about-story__grain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0.05;
+    background-image: url('https://grain-y-gradients.vercel.app/noise.svg');
+  }
+
+  /* Vertical Connecting Line */
+  .about-story__line {
+    position: absolute;
+    top: 200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: calc(100% - 400px);
+    background: linear-gradient(to bottom, transparent, var(--story-accent), transparent);
+    opacity: 0.3;
+    z-index: 1;
+  }
+
+  /* Story Sections */
+  .story-block {
+    min-height: 85vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 20px;
+    position: relative;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 2;
+  }
+
+  .story-block--visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .story-block__container {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+  }
+
+  /* Block Types */
+  .story-block--hero .story-block__title {
+    font-size: clamp(3.5rem, 12vw, 7rem);
+    font-weight: 900;
+    line-height: 0.85;
+    text-transform: uppercase;
+    letter-spacing: -0.06em;
+    margin-bottom: 2.5rem;
+    color: var(--story-accent);
+    filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.3));
+  }
+
+  .story-block--narrative .story-block__content {
+    font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+    line-height: 1.5;
+    font-weight: 300;
+    max-width: 800px;
+    margin: 0 auto;
+    letter-spacing: -0.01em;
+  }
+
+  .story-block__subtitle {
+    display: block;
+    color: var(--story-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    opacity: 0.8;
+  }
+
+  .story-block__image-wrapper {
+    margin-top: 5rem;
+    position: relative;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+
+  .story-block__image {
+    width: 100%;
+    height: auto;
+    filter: grayscale(1) contrast(1.1);
+    transition: filter 0.8s ease, transform 0.8s ease;
+  }
+
+  .story-block:hover .story-block__image {
+    filter: grayscale(0) contrast(1);
+    transform: scale(1.02);
+  }
+
+  /* Parallax Background Elements */
+  .story-parallax {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .story-parallax__item {
+    position: absolute;
+    font-weight: 900;
+    font-size: 18vw;
+    opacity: 0.04;
+    color: var(--story-text);
+    white-space: nowrap;
+    user-select: none;
+    filter: blur(2px);
+    transition: transform 0.1s linear;
+  }
+
+  /* Quote Block */
+  .story-block--quote .story-block__content {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-style: italic;
+    font-weight: 200;
+    line-height: 1.2;
+    padding: 0 40px;
+  }
+
+  /* CTA Block */
+  .story-block--cta h2 {
+    font-size: clamp(3rem, 8vw, 5rem);
+    font-weight: 900;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .story-block--cta .story-block__btn {
+    display: inline-block;
+    padding: 24px 60px;
+    background: var(--story-accent);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.2rem;
+    margin-top: 3rem;
+    border-radius: 2px;
+    transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+  }
+
+  .story-block--cta .story-block__btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.6);
+  }
+
+  @media (max-width: 768px) {
+    .story-block {
+      min-height: 70vh;
+      padding: 80px 20px;
+    }
+    .story-block--hero .story-block__title {
+      font-size: 4rem;
+    }
+    .story-block__line {
+      display: none;
+    }
+  }
+</style>
+
+<div id="about-story-{{ section_id }}" class="about-story-{{ section_id }}">
+  <div class="about-story__grain"></div>
+  <div class="about-story__line"></div>
+
+  {%- for block in section.blocks -%}
+    <section class="story-block story-block--{{ block.type }}" {{ block.shopify_attributes }} data-story-block>
+      <div class="story-block__container">
+        {%- case block.type -%}
+          {%- when 'hero' -%}
+            {%- if block.settings.title != blank -%}
+              <h1 class="story-block__title">{{ block.settings.title }}</h1>
+            {%- endif -%}
+            {%- if block.settings.text != blank -%}
+              <p class="story-block__content">{{ block.settings.text }}</p>
+            {%- endif -%}
+            {%- if block.settings.image != blank -%}
+              <div class="story-block__image-wrapper">
+                {{
+                  block.settings.image
+                  | image_url: width: 1800
+                  | image_tag: loading: 'lazy', class: 'story-block__image'
+                }}
+              </div>
+            {%- endif -%}
+
+          {%- when 'narrative' -%}
+            {%- if block.settings.subtitle != blank -%}
+              <span class="story-block__subtitle">{{ block.settings.subtitle }}</span>
+            {%- endif -%}
+            <div class="story-block__content">
+              {{ block.settings.content }}
+            </div>
+            {%- if block.settings.image != blank -%}
+              <div class="story-block__image-wrapper" style="max-width: 650px; margin-left: auto; margin-right: auto;">
+                {{
+                  block.settings.image
+                  | image_url: width: 1200
+                  | image_tag: loading: 'lazy', class: 'story-block__image'
+                }}
+              </div>
+            {%- endif -%}
+
+          {%- when 'quote' -%}
+            <div class="story-block__content">
+              "{{ block.settings.quote }}"
+              {%- if block.settings.author != blank -%}
+                <cite style="display: block; margin-top: 2rem; font-style: normal; font-weight: 700; font-size: 1rem; color: var(--story-accent);">
+                  — {{ block.settings.author }}
+                </cite>
+              {%- endif -%}
+            </div>
+
+          {%- when 'cta' -%}
+            <h2>{{ block.settings.heading }}</h2>
+            <div class="story-block__content">{{ block.settings.text }}</div>
+            <a href="{{ block.settings.link | default: '/' }}" class="story-block__btn">
+              {{- block.settings.link_text -}}
+            </a>
+        {%- endcase -%}
+      </div>
+
+      {%- if block.settings.background_word != blank -%}
+        <div class="story-parallax">
+          <div
+            class="story-parallax__item"
+            data-parallax-speed="{{ forloop.index | times: 0.12 | plus: 0.08 }}"
+            style="top: {{ forloop.index0 | times: 15 }}%; left: {{ forloop.index | modulo: 2 | times: 35 | plus: 5 }}%;"
+          >
+            {{ block.settings.background_word }}
+          </div>
+        </div>
+      {%- endif -%}
+    </section>
+  {%- endfor -%}
+</div>
+
+<script>
+  (function () {
+    const section = document.querySelector('.about-story-{{ section_id }}');
+    if (!section) return;
+
+    const blocks = section.querySelectorAll('[data-story-block]');
+
+    // Intersection Observer for Reveal Animations
+    const observerOptions = {
+      threshold: 0.15,
+      rootMargin: '0px 0px -100px 0px',
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('story-block--visible');
+        }
+      });
+    }, observerOptions);
+
+    blocks.forEach((block) => observer.observe(block));
+
+    // Refined Parallax Effect on Scroll
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrolled = window.pageYOffset;
+          const parallaxItems = section.querySelectorAll('.story-parallax__item');
+
+          parallaxItems.forEach((item) => {
+            const speed = parseFloat(item.dataset.parallaxSpeed) || 0.1;
+            const yPos = -(scrolled * speed);
+            item.style.transform = `translateY(${yPos}px) translateZ(0)`;
+          });
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Cinematic Story",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Accent Color",
+      "default": "#8b5cf6"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "hero",
+      "name": "The Call (Hero)",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Catchy Title",
+          "default": "Blakv Story – A Dream Returned Stronger"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Intro Text",
+          "default": "At Blakv, our story didn’t start with a shiny logo or a corporate office. It began with two lifelong friends, a shared dream, and a deep passion for fashion and commerce."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Spotlight Image"
+        },
+        {
+          "type": "text",
+          "id": "background_word",
+          "label": "Background Word",
+          "default": "BLAKV"
+        }
+      ]
+    },
+    {
+      "type": "narrative",
+      "name": "The Journey (Narrative)",
+      "settings": [
+        {
+          "type": "text",
+          "id": "subtitle",
+          "label": "Subtitle",
+          "default": "THE BEGINNING"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Story Content",
+          "default": "<p>At Blakv, our story didn’t start with a shiny logo or a corporate office. It began with two lifelong friends, a shared dream, and a deep passion for fashion and commerce.</p>"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Atmospheric Image"
+        },
+        {
+          "type": "text",
+          "id": "background_word",
+          "label": "Background Word",
+          "default": "DREAM"
+        }
+      ]
+    },
+    {
+      "type": "quote",
+      "name": "The Wisdom (Quote)",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote",
+          "default": "Blakv is not just a clothing store. It is a story of friendship, perseverance, and a dream that refused to give up."
+        },
+        {
+          "type": "text",
+          "id": "author",
+          "label": "Author",
+          "default": "Founder"
+        },
+        {
+          "type": "text",
+          "id": "background_word",
+          "label": "Background Word",
+          "default": "FAITH"
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "name": "The Future (CTA)",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Welcome to Blakv."
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "The story has begun again—and this time, it’s here to stay."
+        },
+        {
+          "type": "text",
+          "id": "link_text",
+          "label": "Button Label",
+          "default": "RETURN TO DROP"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Button Link",
+          "default": "/"
+        },
+        {
+          "type": "text",
+          "id": "background_word",
+          "label": "Background Word",
+          "default": "RETURN"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cinematic About Story",
+      "blocks": [
+        {
+          "type": "hero",
+          "settings": {
+            "title": "Blakv Story – A Dream Returned Stronger",
+            "text": "At Blakv, our story didn’t start with a shiny logo or a corporate office. It began with two lifelong friends, a shared dream, and a deep passion for fashion and commerce.",
+            "background_word": "GENESIS"
+          }
+        },
+        {
+          "type": "narrative",
+          "settings": {
+            "subtitle": "THE FIRST STEP",
+            "content": "<p>Over six years ago, we took our first step: a humble experiment selling clothing on eBay. Two years later, my best friend took a leap of faith, designing and selling clothes in our local village. Those were beautiful days—fueled by enthusiasm, experimentation, and learning.</p>",
+            "background_word": "VENTURE"
+          }
+        },
+        {
+          "type": "narrative",
+          "settings": {
+            "subtitle": "THE DETOUR",
+            "content": "<p>But life doesn’t always move in a straight line. Education led me down a different path... My friend pivoted, opening a mobile repair shop and leaving fashion behind to start a new chapter in technology.</p>",
+            "background_word": "PIVOT"
+          }
+        },
+        {
+          "type": "narrative",
+          "settings": {
+            "subtitle": "THE UNCHANGING SPARK",
+            "content": "<p>Yet, the passion never faded. We often found ourselves reminiscing about those early days, asking: What if we kept going? We have worked day and night, driven by the unshakable faith that anything built with passion is built to last.</p>",
+            "background_word": "FAITH"
+          }
+        },
+        {
+          "type": "quote",
+          "settings": {
+            "quote": "Blakv is not just a clothing store. It is a story of friendship, perseverance, and a dream that refused to give up.",
+            "background_word": "IDENTITY"
+          }
+        },
+        {
+          "type": "cta",
+          "settings": {
+            "heading": "Welcome to Blakv.",
+            "text": "The story has begun again—and this time, it’s here to stay.",
+            "link": "/",
+            "link_text": "RETURN TO DROP",
+            "background_word": "FUTURE"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
