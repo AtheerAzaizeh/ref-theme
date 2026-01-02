@@ -47,6 +47,56 @@
     padding: 0 20px;
   }
 
+  /* Accordion Overrides */
+  .drop-reviews__accordion {
+    border-bottom: 1px solid var(--review-border);
+    margin-bottom: 2rem;
+  }
+
+  .drop-reviews__accordion[open] .drop-reviews__icon {
+    transform: rotate(180deg);
+  }
+
+  .drop-reviews__accordion-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2.5rem 0;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+
+  .drop-reviews__accordion-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .drop-reviews__accordion-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .drop-reviews__accordion-badge {
+    background: var(--review-accent);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 900;
+    padding: 2px 10px;
+    border-radius: 4px;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+  }
+
+  .drop-reviews__icon {
+    width: 28px;
+    height: 28px;
+    color: var(--review-accent);
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
   .drop-reviews__header {
     display: flex;
     justify-content: space-between;
@@ -408,167 +458,191 @@
 
 <section class="drop-reviews" id="Reviews-{{ section.id }}">
   <div class="drop-reviews__container">
-    <div class="drop-reviews__header">
-      <h2 class="drop-reviews__title">Community Reviews</h2>
-      <div class="drop-reviews__controls">
-        <div class="drop-reviews__filter-group">
-          <select id="ReviewFilter-{{ section.id }}" class="drop-reviews__select">
-            <option value="all">Rating: All</option>
-            <option value="5">5 Start</option>
-            <option value="4">4 Star</option>
-            <option value="3">3 Star</option>
-            <option value="2">2 Star</option>
-            <option value="1">1 Star</option>
-          </select>
-          <select id="ReviewSort-{{ section.id }}" class="drop-reviews__select">
-            <option value="newest">Sort: Newest</option>
-            <option value="oldest">Sort: Oldest</option>
-          </select>
-        </div>
-        <span class="drop-reviews__count">{{ total_reviews }} total reviews</span>
-      </div>
-    </div>
+    <details class="drop-reviews__accordion">
+      <summary class="drop-reviews__accordion-summary">
+        <h2 class="drop-reviews__accordion-title">
+          Community Reviews
+          {%- if total_reviews > 0 -%}
+            <span class="drop-reviews__accordion-badge">{{ total_reviews }}</span>
+          {%- endif -%}
+        </h2>
+        <svg
+          class="drop-reviews__icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </summary>
 
-    {%- if total_reviews > 0 -%}
-      <div class="drop-reviews__summary">
-        <div class="drop-reviews__avg">
-          <span class="drop-reviews__score">{{ avg_rating }}</span>
-          <div class="drop-reviews__stars">
-            {%- for i in (1..5) -%}
-              {%- if i <= avg_rating -%}★{%- else -%}☆{%- endif -%}
-            {%- endfor -%}
+      <div class="drop-reviews__content-wrapper">
+        {%- if total_reviews > 0 -%}
+          <div class="drop-reviews__header">
+            <h3 class="drop-reviews__title" style="font-size: 1.5rem; opacity: 0.7;">Ratings Overview</h3>
+            <div class="drop-reviews__controls">
+              <div class="drop-reviews__filter-group">
+                <select id="ReviewFilter-{{ section.id }}" class="drop-reviews__select">
+                  <option value="all">Rating: All</option>
+                  <option value="5">5 Star</option>
+                  <option value="4">4 Star</option>
+                  <option value="3">3 Star</option>
+                  <option value="2">2 Star</option>
+                  <option value="1">1 Star</option>
+                </select>
+                <select id="ReviewSort-{{ section.id }}" class="drop-reviews__select">
+                  <option value="newest">Sort: Newest</option>
+                  <option value="oldest">Sort: Oldest</option>
+                </select>
+              </div>
+            </div>
           </div>
-          <span class="drop-reviews__count">Out of 5 stars</span>
-        </div>
 
-        <div class="drop-reviews__bars">
-          {%- for i in (1..5) reversed -%}
-            {%- liquid
-              assign count_for_star = 0
-              for block in section.blocks
-                if block.settings.rating == i
-                  assign count_for_star = count_for_star | plus: 1
-                endif
-              endfor
-              assign pct = count_for_star | times: 100 | divided_by: total_reviews
-            -%}
-            <div class="drop-reviews__bar-item">
-              <span class="drop-reviews__bar-label">{{ i }} Star</span>
-              <div class="drop-reviews__bar-bg">
-                <div class="drop-reviews__bar-fill" style="width: {{ pct }}%"></div>
+          <div class="drop-reviews__summary">
+            <div class="drop-reviews__avg">
+              <span class="drop-reviews__score">{{ avg_rating }}</span>
+              <div class="drop-reviews__stars">
+                {%- for i in (1..5) -%}
+                  {%- if i <= avg_rating -%}★{%- else -%}☆{%- endif -%}
+                {%- endfor -%}
               </div>
-              <span>{{ count_for_star }}</span>
+              <span class="drop-reviews__count">Out of 5 stars</span>
             </div>
-          {%- endfor -%}
-        </div>
-      </div>
 
-      <div class="drop-reviews__list" id="ReviewList-{{ section.id }}">
-        {%- for block in section.blocks -%}
-          <div
-            class="review-item"
-            data-rating="{{ block.settings.rating }}"
-            data-date="{{ block.settings.date | date: '%s' | default: forloop.index }}"
-            {{ block.shopify_attributes }}
-          >
-            <div class="review-item__header">
-              <div class="review-item__user">
-                <strong>{{ block.settings.author | default: 'Anonymous' }}</strong>
-                {%- if block.settings.verified -%}
-                  <span class="review-item__badge">Verified Buyer</span>
-                {%- endif -%}
-              </div>
-              <span class="review-item__date">{{ block.settings.date }}</span>
-            </div>
-            <div class="drop-reviews__stars" style="margin: 0 0 15px 0; font-size: 0.9rem;">
-              {%- for i in (1..5) -%}
-                {%- if i <= block.settings.rating -%}★{%- else -%}☆{%- endif -%}
+            <div class="drop-reviews__bars">
+              {%- for i in (1..5) reversed -%}
+                {%- liquid
+                  assign count_for_star = 0
+                  for block in section.blocks
+                    if block.settings.rating == i
+                      assign count_for_star = count_for_star | plus: 1
+                    endif
+                  endfor
+                  assign pct = 0
+                  if total_reviews > 0
+                    assign pct = count_for_star | times: 100 | divided_by: total_reviews
+                  endif
+                -%}
+                <div class="drop-reviews__bar-item">
+                  <span class="drop-reviews__bar-label">{{ i }} Star</span>
+                  <div class="drop-reviews__bar-bg">
+                    <div class="drop-reviews__bar-fill" style="width: {{ pct }}%"></div>
+                  </div>
+                  <span style="min-width: 20px; text-align: right;">{{ count_for_star }}</span>
+                </div>
               {%- endfor -%}
             </div>
-            <div class="review-item__content">
-              {{ block.settings.content }}
-            </div>
           </div>
-        {%- endfor -%}
-      </div>
-    {%- else -%}
-      <div style="text-align: center; padding: 40px; color: var(--review-text-muted);">
-        No reviews yet. Be the first to share your experience.
-      </div>
-    {%- endif -%}
 
-    {%- if is_verified_buyer -%}
-      <div class="drop-reviews__form-trigger">
-        <button class="drop-reviews__btn" id="WriteReviewBtn-{{ section.id }}">Share Your Experience</button>
-      </div>
-
-      <!-- Review Submission Modal -->
-      <div class="review-modal" id="ReviewModal-{{ section.id }}" style="display: none;">
-        <div class="review-modal__content">
-          <button class="review-modal__close" id="CloseReviewModal-{{ section.id }}">&times;</button>
-          <h3 class="review-modal__title">Submit Your Review</h3>
-          <p class="review-modal__subtitle">Verified Purchase: {{ current_product.title }}</p>
-
-          <form class="review-form" id="ReviewForm-{{ section.id }}">
-            <div class="review-form__group">
-              <label class="review-form__label">Overall Rating</label>
-              <div class="review-form__stars" id="StarSelector-{{ section.id }}">
-                <span data-value="1">☆</span><span data-value="2">☆</span><span data-value="3">☆</span
-                ><span data-value="4">☆</span><span data-value="5">☆</span>
-              </div>
-              <input type="hidden" name="rating" id="RatingInput-{{ section.id }}" value="5">
-            </div>
-
-            <div class="review-form__group">
-              <label class="review-form__label" for="ReviewText-{{ section.id }}">Your Experience</label>
-              <textarea
-                id="ReviewText-{{ section.id }}"
-                class="review-form__input"
-                rows="5"
-                placeholder="What did you think of the fit, quality, and drop experience?"
-                required
-              ></textarea>
-            </div>
-
-            <div class="review-form__group">
-              <label class="review-form__label">Upload Photos/Videos (Optional)</label>
-              <div class="review-form__upload">
-                <input
-                  type="file"
-                  id="ReviewMedia-{{ section.id }}"
-                  class="review-form__file"
-                  accept="image/*,video/*"
-                  multiple
-                >
-                <div class="review-form__upload-placeholder">
-                  <span>+ Add Media</span>
+          <div class="drop-reviews__list" id="ReviewList-{{ section.id }}">
+            {%- for block in section.blocks -%}
+              <div
+                class="review-item"
+                data-rating="{{ block.settings.rating }}"
+                data-date="{{ block.settings.date | date: '%s' | default: forloop.index }}"
+                {{ block.shopify_attributes }}
+              >
+                <div class="review-item__header">
+                  <div class="review-item__user">
+                    <strong>{{ block.settings.author | default: 'Anonymous' }}</strong>
+                    {%- if block.settings.verified -%}
+                      <span class="review-item__badge">Verified Buyer</span>
+                    {%- endif -%}
+                  </div>
+                  <span class="review-item__date">{{ block.settings.date }}</span>
+                </div>
+                <div class="drop-reviews__stars" style="margin: 0 0 15px 0; font-size: 0.9rem;">
+                  {%- for i in (1..5) -%}
+                    {%- if i <= block.settings.rating -%}★{%- else -%}☆{%- endif -%}
+                  {%- endfor -%}
+                </div>
+                <div class="review-item__content">
+                  {{ block.settings.content }}
                 </div>
               </div>
-            </div>
-
-            <button type="submit" class="drop-reviews__btn" style="width: 100%;">Submit Review</button>
-          </form>
-
-          <div class="review-modal__success" id="ReviewSuccess-{{ section.id }}" style="display: none;">
-            <div class="review-modal__icon">✓</div>
-            <h4>Thank you!</h4>
-            <p>Your review has been submitted for moderation. It will appear on the site soon.</p>
-            <button class="drop-reviews__btn" onclick="location.reload()">Back to Product</button>
+            {%- endfor -%}
           </div>
-        </div>
-        <div class="review-modal__overlay"></div>
+        {%- else -%}
+          <div style="text-align: center; padding: 40px; color: var(--review-text-muted);">
+            No reviews yet. Be the first to share your experience.
+          </div>
+        {%- endif -%}
+
+        {%- if is_verified_buyer -%}
+          <div class="drop-reviews__form-trigger">
+            <button class="drop-reviews__btn" id="WriteReviewBtn-{{ section.id }}">Share Your Experience</button>
+          </div>
+
+          <!-- Review Submission Modal -->
+          <div class="review-modal" id="ReviewModal-{{ section.id }}" style="display: none;">
+            <div class="review-modal__content">
+              <button class="review-modal__close" id="CloseReviewModal-{{ section.id }}">&times;</button>
+              <h3 class="review-modal__title">Submit Your Review</h3>
+              <p class="review-modal__subtitle">Verified Purchase: {{ current_product.title }}</p>
+
+              <form class="review-form" id="ReviewForm-{{ section.id }}">
+                <div class="review-form__group">
+                  <label class="review-form__label">Overall Rating</label>
+                  <div class="review-form__stars" id="StarSelector-{{ section.id }}">
+                    <span data-value="1">☆</span><span data-value="2">☆</span><span data-value="3">☆</span
+                    ><span data-value="4">☆</span><span data-value="5">☆</span>
+                  </div>
+                  <input type="hidden" name="rating" id="RatingInput-{{ section.id }}" value="5">
+                </div>
+
+                <div class="review-form__group">
+                  <label class="review-form__label" for="ReviewText-{{ section.id }}">Your Experience</label>
+                  <textarea
+                    id="ReviewText-{{ section.id }}"
+                    class="review-form__input"
+                    rows="5"
+                    placeholder="What did you think of the fit, quality, and drop experience?"
+                    required
+                  ></textarea>
+                </div>
+
+                <div class="review-form__group">
+                  <label class="review-form__label">Upload Photos/Videos (Optional)</label>
+                  <div class="review-form__upload">
+                    <input
+                      type="file"
+                      id="ReviewMedia-{{ section.id }}"
+                      class="review-form__file"
+                      accept="image/*,video/*"
+                      multiple
+                    >
+                    <div class="review-form__upload-placeholder">
+                      <span>+ Add Media</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button type="submit" class="drop-reviews__btn" style="width: 100%;">Submit Review</button>
+              </form>
+
+              <div class="review-modal__success" id="ReviewSuccess-{{ section.id }}" style="display: none;">
+                <div class="review-modal__icon">✓</div>
+                <h4>Thank you!</h4>
+                <p>Your review has been submitted for moderation. It will appear on the site soon.</p>
+                <button class="drop-reviews__btn" onclick="location.reload()">Back to Product</button>
+              </div>
+            </div>
+            <div class="review-modal__overlay"></div>
+          </div>
+        {%- else -%}
+          <div class="drop-reviews__locked">
+            <p style="margin: 0;">Only customers who have purchased this item can leave a review.</p>
+            {%- unless customer -%}
+              <p style="font-size: 0.85rem; margin-top: 10px;">
+                <a href="{{ routes.account_login_url }}" style="color: var(--review-accent);">Log in</a> to check your
+                eligibility.
+              </p>
+            {%- endunless -%}
+          </div>
+        {%- endif -%}
       </div>
-    {%- else -%}
-      <div class="drop-reviews__locked">
-        <p style="margin: 0;">Only customers who have purchased this item can leave a review.</p>
-        {%- unless customer -%}
-          <p style="font-size: 0.85rem; margin-top: 10px;">
-            <a href="{{ routes.account_login_url }}" style="color: var(--review-accent);">Log in</a> to check your
-            eligibility.
-          </p>
-        {%- endunless -%}
-      </div>
-    {%- endif -%}
+    </details>
   </div>
 </section>
 
