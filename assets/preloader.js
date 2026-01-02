@@ -13,9 +13,6 @@
     fadeDelay: 100,        // Delay before hiding (ms)
     buttonSelectors: [
       '.drop-add-button',
-      'button[type="submit"]',
-      '.btn',
-      '.button',
       '[data-preloader]'
     ],
     linkSelectors: [
@@ -23,12 +20,36 @@
       'a[href^="' + window.location.origin + '"]'
     ],
     excludeSelectors: [
+      // General exclusions
       '[data-no-preloader]',
       '[target="_blank"]',
       '[href^="#"]',
       '[href^="mailto:"]',
       '[href^="tel:"]',
-      '.no-preloader'
+      '.no-preloader',
+      // Cart AJAX operations - these don't reload the page
+      '.cart-remove-button',
+      'cart-remove-button',
+      '[data-cart-remove]',
+      '.quantity__button',
+      '[name="minus"]',
+      '[name="plus"]',
+      '.cart__remove',
+      '.remove',
+      '.cart-item__remove',
+      'a[href*="/cart/change"]',
+      // Quick add/view buttons
+      '.quick-add__submit',
+      '[data-quick-add]',
+      // Modal triggers
+      '[data-modal]',
+      '[aria-controls]',
+      // Accordion/disclosure
+      'summary',
+      '.disclosure__button',
+      // Search
+      '.search__button',
+      '[type="search"]'
     ]
   };
 
@@ -156,6 +177,16 @@
   function attachFormListeners() {
     document.querySelectorAll('form').forEach(function(form) {
       if (isExcluded(form)) return;
+      
+      // Skip cart forms (they use AJAX)
+      const action = form.getAttribute('action') || '';
+      if (action.includes('/cart')) return;
+      
+      // Skip forms with AJAX handling attributes
+      if (form.hasAttribute('data-ajax') || form.hasAttribute('is')) return;
+      
+      // Skip newsletter forms
+      if (form.id && form.id.includes('Contact')) return;
       
       form.addEventListener('submit', function(e) {
         if (!e.defaultPrevented) {
