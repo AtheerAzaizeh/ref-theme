@@ -467,6 +467,27 @@
     {% if section.settings.custom_background_gradient != blank %}
       background: {{ section.settings.custom_background_gradient }};
     {% endif %}
+    --drop-reviews-btn-bg: {{ section.settings.btn_bg }};
+    --drop-reviews-btn-text: {{ section.settings.btn_text }};
+    --drop-reviews-btn-border: {{ section.settings.btn_border }};
+    --drop-reviews-btn-hover-bg: {{ section.settings.btn_hover_bg }};
+    --drop-reviews-btn-hover-text: {{ section.settings.btn_hover_text }};
+    --drop-reviews-btn-hover-border: {{ section.settings.btn_hover_border }};
+  }
+
+  .drop-reviews--{{ section.id }} .button,
+  .drop-reviews--{{ section.id }} .review-modal__button {
+    background: var(--drop-reviews-btn-bg);
+    color: var(--drop-reviews-btn-text);
+    border: 1px solid var(--drop-reviews-btn-border);
+  }
+
+  .drop-reviews--{{ section.id }} .button:hover,
+  .drop-reviews--{{ section.id }} .review-modal__button:hover {
+    background: var(--drop-reviews-btn-hover-bg);
+    color: var(--drop-reviews-btn-text-hover); /* Fixed typo later if needed, using text instead */
+    color: var(--drop-reviews-btn-hover-text);
+    border-color: var(--drop-reviews-btn-hover-border);
   }
 {%- endstyle -%}
 
@@ -776,6 +797,46 @@
 {
   "name": "Verified Reviews",
   "settings": [
+    {
+      "type": "header",
+      "content": "Button Styling"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg",
+      "label": "Button Background",
+      "default": "#8b5cf6"
+    },
+    {
+      "type": "color",
+      "id": "btn_text",
+      "label": "Button Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "btn_border",
+      "label": "Button Border",
+      "default": "#8b5cf6"
+    },
+    {
+      "type": "color",
+      "id": "btn_hover_bg",
+      "label": "Button Hover Background",
+      "default": "#7c3aed"
+    },
+    {
+      "type": "color",
+      "id": "btn_hover_text",
+      "label": "Button Hover Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "btn_hover_border",
+      "label": "Button Hover Border",
+      "default": "#7c3aed"
+    },
     {
       "type": "header",
       "content": "Appearance"

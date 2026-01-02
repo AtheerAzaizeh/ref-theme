@@ -168,6 +168,26 @@
   .newsletter-modal__dismiss:hover {
     color: rgba(255, 255, 255, 0.8);
   }
+  #NewsletterModal-{{ section.id }} {
+    --modal-btn-bg: {{ section.settings.btn_bg }};
+    --modal-btn-text: {{ section.settings.btn_text }};
+    --modal-btn-border: {{ section.settings.btn_border }};
+    --modal-btn-hover-bg: {{ section.settings.btn_hover_bg }};
+    --modal-btn-hover-text: {{ section.settings.btn_hover_text }};
+    --modal-btn-hover-border: {{ section.settings.btn_hover_border }};
+  }
+
+  #NewsletterModal-{{ section.id }} .button--primary {
+    background: var(--modal-btn-bg);
+    color: var(--modal-btn-text);
+    border: 1px solid var(--modal-btn-border);
+  }
+
+  #NewsletterModal-{{ section.id }} .button--primary:hover {
+    background: var(--modal-btn-hover-bg);
+    color: var(--modal-btn-hover-text);
+    border-color: var(--modal-btn-hover-border);
+  }
 {%- endstyle -%}
 
 <div
@@ -312,10 +332,48 @@
   "name": "Welcome Discount Modal",
   "settings": [
     {
-      "type": "text",
-      "id": "heading",
-      "default": "Unlock 5% OFF",
-      "label": "Heading"
+      "type": "header",
+      "content": "Button Styling"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg",
+      "label": "Button Background",
+      "default": "#8b5cf6"
+    },
+    {
+      "type": "color",
+      "id": "btn_text",
+      "label": "Button Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "btn_border",
+      "label": "Button Border",
+      "default": "#8b5cf6"
+    },
+    {
+      "type": "color",
+      "id": "btn_hover_bg",
+      "label": "Button Hover Background",
+      "default": "#7c3aed"
+    },
+    {
+      "type": "color",
+      "id": "btn_hover_text",
+      "label": "Button Hover Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "btn_hover_border",
+      "label": "Button Hover Border",
+      "default": "#7c3aed"
+    },
+    {
+      "type": "header",
+      "content": "Content"
     },
     {
       "type": "textarea",

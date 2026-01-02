@@ -13,6 +13,29 @@
       padding-bottom: {{ section.settings.padding_bottom }}px;
     }
   }
+  .drop-section--{{ section.id }} {
+    {% if section.settings.custom_background_gradient != blank %}
+      background: {{ section.settings.custom_background_gradient }};
+    {% endif %}
+    --drop-btn-bg: {{ section.settings.btn_bg }};
+    --drop-btn-text: {{ section.settings.btn_text }};
+    --drop-btn-border: {{ section.settings.btn_border }};
+    --drop-btn-hover-bg: {{ section.settings.btn_hover_bg }};
+    --drop-btn-hover-text: {{ section.settings.btn_hover_text }};
+    --drop-btn-hover-border: {{ section.settings.btn_hover_border }};
+  }
+
+  .drop-section--{{ section.id }} .button--primary {
+    background: var(--drop-btn-bg);
+    color: var(--drop-btn-text);
+    border: 1px solid var(--drop-btn-border);
+  }
+
+  .drop-section--{{ section.id }} .button--primary:hover {
+    background: var(--drop-btn-hover-bg);
+    color: var(--drop-btn-hover-text);
+    border-color: var(--drop-btn-hover-border);
+  }
 {%- endstyle -%}
 
 {%- liquid
@@ -624,6 +647,62 @@
     },
     {
       "type": "header",
+      "content": "Button Styling"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg",
+      "label": "Button Background",
+      "default": "#8b5cf6"
+    },
+    {
+      "type": "color",
+      "id": "btn_text",
+      "label": "Button Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "btn_border",
+      "label": "Button Border",
+      "default": "#8b5cf6"
+    },
+    {
+      "type": "color",
+      "id": "btn_hover_bg",
+      "label": "Button Hover Background",
+      "default": "#7c3aed"
+    },
+    {
+      "type": "color",
+      "id": "btn_hover_text",
+      "label": "Button Hover Text",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "btn_hover_border",
+      "label": "Button Hover Border",
+      "default": "#7c3aed"
+    },
+    {
+      "type": "header",
+      "content": "Appearance"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "default": "scheme-1"
+    },
+    {
+      "type": "color_background",
+      "id": "custom_background_gradient",
+      "label": "Custom background gradient",
+      "info": "Overrides the color scheme background if set."
+    },
+    {
+      "type": "header",
       "content": "Notifications"
     },
     {
@@ -654,16 +733,6 @@
       "id": "show_trust_badges",
       "label": "Show trust badges",
       "default": true
-    },
-    {
-      "type": "header",
-      "content": "Colors"
-    },
-    {
-      "type": "color_scheme",
-      "id": "color_scheme",
-      "label": "Color scheme",
-      "default": "scheme-1"
     },
     {
       "type": "header",
