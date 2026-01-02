@@ -14,7 +14,27 @@
 
 <header class="minimal-header color-{{ section.settings.color_scheme }} gradient">
   <div class="minimal-header__container page-width">
-    {%- comment -%} Logo {%- endcomment -%}
+    {%- comment -%} Left Menu {%- endcomment -%}
+    <nav class="minimal-header__nav">
+      <ul class="minimal-header__menu">
+        {%- if section.settings.show_about_link -%}
+          <li class="minimal-header__menu-item">
+            <a href="{{ section.settings.about_link | default: '/pages/about-us' }}" class="minimal-header__menu-link">
+              {{ section.settings.about_text | default: 'About' }}
+            </a>
+          </li>
+        {%- endif -%}
+        {%- if section.settings.show_contact_link -%}
+          <li class="minimal-header__menu-item">
+            <a href="{{ section.settings.contact_link | default: '/pages/contact' }}" class="minimal-header__menu-link">
+              {{ section.settings.contact_text | default: 'Contact' }}
+            </a>
+          </li>
+        {%- endif -%}
+      </ul>
+    </nav>
+
+    {%- comment -%} Center Logo {%- endcomment -%}
     <div class="minimal-header__logo">
       {%- if request.page_type == 'index' -%}
         <h1 class="minimal-header__heading">
@@ -47,9 +67,9 @@
       {%- endif -%}
     </div>
 
-    {%- comment -%} Cart Icon {%- endcomment -%}
-    {%- if section.settings.show_cart -%}
-      <div class="minimal-header__icons">
+    {%- comment -%} Right Cart Icon {%- endcomment -%}
+    <div class="minimal-header__actions">
+      {%- if section.settings.show_cart -%}
         <a href="{{ routes.cart_url }}" class="minimal-header__cart-link" aria-label="{{ 'sections.header.cart' | t }}">
           <svg
             class="minimal-header__cart-icon"
@@ -66,21 +86,24 @@
             <span class="minimal-header__cart-count">{{ cart.item_count }}</span>
           {%- endif -%}
         </a>
-      </div>
-    {%- endif -%}
+      {%- endif -%}
+    </div>
   </div>
 </header>
 
 {% schema %}
 {
-  "name": "Minimal Header",
+  "name": "Header",
   "class": "section-header",
   "settings": [
     {
+      "type": "header",
+      "content": "Logo"
+    },
+    {
       "type": "image_picker",
       "id": "logo",
-      "label": "Logo image",
-      "info": "Upload your logo here, or use the global logo from Theme Settings"
+      "label": "Logo image"
     },
     {
       "type": "range",
@@ -93,10 +116,56 @@
       "label": "Logo width"
     },
     {
+      "type": "header",
+      "content": "Menu Links"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_about_link",
+      "label": "Show About link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "about_text",
+      "label": "About link text",
+      "default": "About"
+    },
+    {
+      "type": "url",
+      "id": "about_link",
+      "label": "About link URL"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_contact_link",
+      "label": "Show Contact link",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "contact_text",
+      "label": "Contact link text",
+      "default": "Contact"
+    },
+    {
+      "type": "url",
+      "id": "contact_link",
+      "label": "Contact link URL"
+    },
+    {
+      "type": "header",
+      "content": "Cart"
+    },
+    {
       "type": "checkbox",
       "id": "show_cart",
       "label": "Show cart icon",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "Style"
     },
     {
       "type": "color_scheme",

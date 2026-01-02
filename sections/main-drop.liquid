@@ -52,19 +52,65 @@
             </span>
           {%- endif -%}
 
-          {%- if product.featured_media -%}
-            {{
-              product.featured_media
-              | image_url: width: 1200
-              | image_tag:
-                loading: 'eager',
-                class: 'drop-media__image',
-                widths: '375, 550, 750, 1100, 1200',
-                sizes: '(min-width: 990px) 50vw, 100vw'
-            }}
-          {%- else -%}
-            {{ 'product-1' | placeholder_svg_tag: 'drop-media__image placeholder-svg' }}
-          {%- endif -%}
+          {%- comment -%} Main Image {%- endcomment -%}
+          <div class="drop-gallery">
+            <div class="drop-gallery__main">
+              {%- if product.featured_media -%}
+                <img
+                  id="drop-main-image"
+                  src="{{ product.featured_media | image_url: width: 1200 }}"
+                  alt="{{ product.featured_media.alt | escape }}"
+                  class="drop-gallery__image"
+                  loading="eager"
+                  width="1200"
+                  height="{{ 1200 | divided_by: product.featured_media.aspect_ratio | round }}"
+                >
+              {%- else -%}
+                {{ 'product-1' | placeholder_svg_tag: 'drop-gallery__image placeholder-svg' }}
+              {%- endif -%}
+            </div>
+
+            {%- comment -%} Thumbnail Gallery {%- endcomment -%}
+            {%- if product.media.size > 1 -%}
+              <div class="drop-gallery__thumbs">
+                {%- for media in product.media -%}
+                  {%- if media.media_type == 'image' -%}
+                    <button
+                      type="button"
+                      class="drop-gallery__thumb{% if forloop.first %} drop-gallery__thumb--active{% endif %}"
+                      data-image-url="{{ media | image_url: width: 1200 }}"
+                      data-image-alt="{{ media.alt | default: product.title | escape }}"
+                      aria-label="View image {{ forloop.index }}"
+                    >
+                      <img
+                        src="{{ media | image_url: width: 150 }}"
+                        alt="{{ media.alt | default: product.title | escape }}"
+                        width="80"
+                        height="80"
+                        loading="lazy"
+                      >
+                    </button>
+                  {%- elsif media.preview_image -%}
+                    <button
+                      type="button"
+                      class="drop-gallery__thumb{% if forloop.first %} drop-gallery__thumb--active{% endif %}"
+                      data-image-url="{{ media.preview_image | image_url: width: 1200 }}"
+                      data-image-alt="{{ media.alt | default: product.title | escape }}"
+                      aria-label="View image {{ forloop.index }}"
+                    >
+                      <img
+                        src="{{ media.preview_image | image_url: width: 150 }}"
+                        alt="{{ media.alt | default: product.title | escape }}"
+                        width="80"
+                        height="80"
+                        loading="lazy"
+                      >
+                    </button>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+          </div>
         </div>
 
         {%- comment -%} Product Info {%- endcomment -%}
@@ -290,11 +336,25 @@
             </drop-notify>
           {%- endif -%}
 
-          {%- comment -%} Description {%- endcomment -%}
+          {%- comment -%} Description with Accordion {%- endcomment -%}
           {%- if product.description != blank -%}
-            <div class="drop-info__description rte">
-              {{ product.description }}
-            </div>
+            <details class="drop-description" open>
+              <summary class="drop-description__header">
+                <span class="drop-description__title">Product Details</span>
+                <svg
+                  class="drop-description__icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </summary>
+              <div class="drop-description__content rte">
+                {{ product.description }}
+              </div>
+            </details>
           {%- endif -%}
 
           {%- comment -%} Trust Badges {%- endcomment -%}
@@ -352,6 +412,158 @@
     {%- endif -%}
   </div>
 </drop-status>
+
+{%- if product != blank and product.has_only_default_variant == false -%}
+  <script type="application/json" id="product-variants-{{ section.id }}">
+    {{ product.variants | json }}
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const section = document.querySelector('.section-drop');
+      if (!section) return;
+
+      const variantButtons = section.querySelectorAll('.drop-variant-option');
+      const addForm = document.getElementById('drop-add-form');
+      const buyForm = document.getElementById('drop-buy-form');
+      const variantsJson = document.getElementById('product-variants-{{ section.id }}');
+
+      if (!variantsJson) return;
+
+      const variants = JSON.parse(variantsJson.textContent);
+      let selectedOptions = {};
+
+      // Initialize selected options from currently selected buttons
+      section.querySelectorAll('.drop-variant-option--selected').forEach((btn) => {
+        const position = btn.dataset.optionPosition;
+        const value = btn.dataset.optionValue;
+        selectedOptions[position] = value;
+      });
+
+      variantButtons.forEach((button) => {
+        button.addEventListener('click', function () {
+          const position = this.dataset.optionPosition;
+          const value = this.dataset.optionValue;
+
+          // Update selected options
+          selectedOptions[position] = value;
+
+          // Update button states for this option group
+          const optionGroup = this.closest('.drop-variants__options');
+          optionGroup.querySelectorAll('.drop-variant-option').forEach((btn) => {
+            btn.classList.remove('drop-variant-option--selected');
+          });
+          this.classList.add('drop-variant-option--selected');
+
+          // Find matching variant
+          const matchingVariant = variants.find((variant) => {
+            let match = true;
+            for (let i = 1; i <= 3; i++) {
+              const optionKey = 'option' + i;
+              if (selectedOptions[i] && variant[optionKey] !== selectedOptions[i]) {
+                match = false;
+                break;
+              }
+            }
+            return match;
+          });
+
+          if (matchingVariant) {
+            // Update form hidden inputs
+            if (addForm) {
+              addForm.querySelector('input[name="id"]').value = matchingVariant.id;
+              const addBtn = addForm.querySelector('button[type="submit"]');
+              if (addBtn) {
+                addBtn.disabled = !matchingVariant.available;
+                addBtn.textContent = matchingVariant.available
+                  ? '{{ section.settings.add_to_cart_label | default: "Add to Cart" }}'
+                  : 'Sold Out';
+              }
+            }
+
+            if (buyForm) {
+              buyForm.querySelector('input[name="id"]').value = matchingVariant.id;
+              const buyBtn = buyForm.querySelector('button[type="submit"]');
+              if (buyBtn) {
+                buyBtn.disabled = !matchingVariant.available;
+                buyBtn.textContent = matchingVariant.available
+                  ? '{{ section.settings.buy_now_label | default: "Buy Now" }}'
+                  : 'Sold Out';
+              }
+            }
+
+            // Update price display if price changes
+            const priceEl = section.querySelector('.drop-info__price-current');
+            if (priceEl && matchingVariant.price) {
+              priceEl.textContent = Shopify.formatMoney
+                ? Shopify.formatMoney(matchingVariant.price)
+                : '$' + (matchingVariant.price / 100).toFixed(2);
+            }
+          }
+        });
+      });
+    });
+  </script>
+{%- endif -%}
+
+{%- comment -%} Gallery Thumbnail Script {%- endcomment -%}
+{%- if product != blank and product.media.size > 1 -%}
+  <script>
+    (function () {
+      function initGallery() {
+        const thumbs = document.querySelectorAll('.drop-gallery__thumb');
+        const mainImage = document.getElementById('drop-main-image');
+
+        if (!mainImage) {
+          console.log('Gallery: Main image not found');
+          return;
+        }
+
+        if (thumbs.length === 0) {
+          console.log('Gallery: No thumbnails found');
+          return;
+        }
+
+        console.log('Gallery: Initializing with', thumbs.length, 'thumbnails');
+
+        thumbs.forEach((thumb) => {
+          thumb.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            // Update active state
+            thumbs.forEach((t) => t.classList.remove('drop-gallery__thumb--active'));
+            this.classList.add('drop-gallery__thumb--active');
+
+            // Get new image URL
+            const newUrl = this.getAttribute('data-image-url');
+            const newAlt = this.getAttribute('data-image-alt') || '';
+
+            console.log('Gallery: Switching to', newUrl);
+
+            // Fade and switch image
+            mainImage.style.opacity = '0.3';
+            mainImage.style.transition = 'opacity 0.2s ease';
+
+            setTimeout(function () {
+              mainImage.src = newUrl;
+              mainImage.alt = newAlt;
+              mainImage.onload = function () {
+                mainImage.style.opacity = '1';
+              };
+            }, 200);
+          });
+        });
+      }
+
+      // Run when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initGallery);
+      } else {
+        initGallery();
+      }
+    })();
+  </script>
+{%- endif -%}
 
 {% schema %}
 {

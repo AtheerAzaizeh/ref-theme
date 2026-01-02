@@ -8,7 +8,32 @@
 {%- style -%}
   .footer {
     margin-top: {{ section.settings.margin_top | times: 0.75 | round: 0 }}px;
+    {%- if section.settings.background_image != blank -%}
+      position: relative;
+      background-image: url('{{ section.settings.background_image | image_url: width: 2000 }}');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    {%- endif -%}
   }
+
+  {%- if section.settings.background_image != blank -%}
+    .footer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, {{ section.settings.background_overlay_opacity | divided_by: 100.0 }});
+      z-index: 0;
+    }
+
+    .footer > * {
+      position: relative;
+      z-index: 1;
+    }
+  {%- endif -%}
 
   .section-{{ section.id }}-padding {
     padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
@@ -424,6 +449,26 @@
     }
   ],
   "settings": [
+    {
+      "type": "header",
+      "content": "Background"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Background image"
+    },
+    {
+      "type": "range",
+      "id": "background_overlay_opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 70,
+      "unit": "%",
+      "label": "Overlay opacity",
+      "info": "Darken the background image for better text readability"
+    },
     {
       "type": "color_scheme",
       "id": "color_scheme",
