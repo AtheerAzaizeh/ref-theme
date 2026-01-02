@@ -43,6 +43,10 @@
     {{ 'mysterious-design.css' | asset_url | stylesheet_tag }}
     <script src="{{ 'mysterious-effects.js' | asset_url }}" defer="defer"></script>
 
+    {%- comment -%} Store Preloader {%- endcomment -%}
+    {{ 'preloader.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'preloader.js' | asset_url }}" defer="defer"></script>
+
     {{ content_for_header }}
 
     {%- liquid
@@ -310,6 +314,9 @@
     {%- if settings.cart_type == 'drawer' -%}
       {%- render 'cart-drawer' -%}
     {%- endif -%}
+
+    {%- comment -%} Preloader {%- endcomment -%}
+    {%- render 'preloader' -%}
 
     {% sections 'header-group' %}
 

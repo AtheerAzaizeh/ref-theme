@@ -1,0 +1,164 @@
+/**
+ * Store Preloader
+ * Shows animated logo during page transitions and button clicks
+ */
+
+/* === Preloader Overlay === */
+.store-preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  background: var(--mysterious-bg-deep, rgb(var(--color-background)));
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.store-preloader.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* === Logo Container === */
+.store-preloader__logo {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: preloader-pulse 1.5s ease-in-out infinite;
+}
+
+.store-preloader__logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.store-preloader__logo svg {
+  width: 80px;
+  height: 80px;
+  color: var(--mysterious-glow-primary, #8b5cf6);
+}
+
+/* === Loading Spinner Ring === */
+.store-preloader__ring {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border: 2px solid transparent;
+  border-top-color: var(--mysterious-glow-primary, #8b5cf6);
+  border-radius: 50%;
+  animation: preloader-spin 1s linear infinite;
+}
+
+.store-preloader__ring::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  border: 2px solid transparent;
+  border-top-color: var(--mysterious-glow-secondary, #a855f7);
+  border-radius: 50%;
+  animation: preloader-spin 1.5s linear infinite reverse;
+}
+
+/* === Loading Text === */
+.store-preloader__text {
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--mysterious-text-muted, rgba(255, 255, 255, 0.5));
+  animation: preloader-fade 1.5s ease-in-out infinite;
+}
+
+/* === Animations === */
+@keyframes preloader-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes preloader-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes preloader-fade {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* === Progress Bar (optional) === */
+.store-preloader__progress {
+  position: absolute;
+  bottom: 100px;
+  width: 200px;
+  height: 3px;
+  background: var(--mysterious-glass-border, rgba(255, 255, 255, 0.1));
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.store-preloader__progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--mysterious-glow-primary, #8b5cf6), var(--mysterious-glow-secondary, #a855f7));
+  border-radius: 2px;
+  animation: preloader-progress 1.5s ease-in-out infinite;
+}
+
+@keyframes preloader-progress {
+  0% {
+    width: 0%;
+    margin-left: 0%;
+  }
+  50% {
+    width: 60%;
+    margin-left: 20%;
+  }
+  100% {
+    width: 0%;
+    margin-left: 100%;
+  }
+}
+
+/* === Reduced Motion === */
+@media (prefers-reduced-motion: reduce) {
+  .store-preloader__logo,
+  .store-preloader__ring,
+  .store-preloader__ring::before,
+  .store-preloader__text,
+  .store-preloader__progress-bar {
+    animation: none;
+  }
+  
+  .store-preloader__ring {
+    border-color: var(--mysterious-glow-primary, #8b5cf6);
+  }
+}
