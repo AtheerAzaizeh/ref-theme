@@ -585,6 +585,19 @@
         initGallery();
       }
     })();
+
+    // Discount Auto-Apply Logic
+    document.addEventListener('DOMContentLoaded', () => {
+      const code = localStorage.getItem('drop_discount_code');
+      if (code) {
+        document.querySelectorAll('form[action="/cart/add"]').forEach((form) => {
+          let returnTo = form.querySelector('[name="return_to"]');
+          if (returnTo && returnTo.value === '/checkout') {
+            returnTo.value = `/checkout?discount=${code}`;
+          }
+        });
+      }
+    });
   </script>
 {%- endif -%}
 

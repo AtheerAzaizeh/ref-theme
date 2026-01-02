@@ -282,9 +282,23 @@
     button.innerText = 'Applying...';
     button.disabled = true;
 
-    // Apply discount in background to avoid redirecting the user
+    // 1. Save to LocalStorage for persistence
+    localStorage.setItem('drop_discount_code', code);
+
+    // 2. Set the Shopify discount cookie directly for checkout
+    document.cookie = `discount_code=${code}; path=/; max-age=604800;`; // 1 week
+
+    // 3. Optional: Background fetch as a third layer of safety
     fetch(`/discount/${code}`, { mode: 'no-cors' }).finally(() => {
       button.innerText = 'Applied! ✨';
+
+      // Update any checkout links on the page immediately
+      document.querySelectorAll('form[action="/cart/add"] [name="return_to"]').forEach((input) => {
+        if (input.value === '/checkout') {
+          input.value = `/checkout?discount=${code}`;
+        }
+      });
+
       setTimeout(() => {
         const modal = document.getElementById('NewsletterModal-{{ section.id }}');
         modal.classList.remove('is-visible');
